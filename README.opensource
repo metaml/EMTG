@@ -6,8 +6,9 @@
 ======================================================================================================================================
 Evolutionary Mission Trajectory Generator (EMTG) Open Source Release
 Originating author: Jacob Englander
-Mainainer: NASA Goddard Spaceflight Center (GSFC) Code 595 EMTG team (GSFC-DL-TrajOpt-Support@mail.nasa.gov)
-Version: 9.01
+Maintainer: NASA Goddard Spaceflight Center (GSFC) Code 595 EMTG team (GSFC-DL-TrajOpt-Support@mail.nasa.gov)
+CU LASP Maintainer: Jeremy Knittel (jeremy.knittel@lasp.colorado.edu)
+Version: 9.02
 License: NASA Open Source Agreement (https://www.nasa.gov/open/open-source-development.html)
 ======================================================================================================================================
 ~~~~~~~~
@@ -20,27 +21,36 @@ all third-party dependencies.
 ~~~~~~~~~~~~~
 Dependencies:
 ~~~~~~~~~~~~~
-EMTG has several software dependencies but all, with the exception of the Sparse Nonlinear OPTimizer (SNOPT), are free software. 
-The current EMTG software is configured to work best with SNOPT 7.6. To acquire SNOPT visit their product page 
+EMTG has several software dependencies but all are free software. EMTG requires an optimization package, and currently either
+the Sparse Nonlinear OPTimizer (SNOPT, not free) and the Interior Point OPTimizer (IPOPT, free) are tested and verified.
+
+If using SNOPT, the current EMTG software is configured to work best with SNOPT 7.6. To acquire SNOPT visit their product page 
 (http://sbsi-sol-optimize.com/asp/sol_product_snopt.htm). 
+
+If using IPOPT, the current EMTG software is configured to work best with IPOPT 3.14. To acquire IPOPT, visit their github
+(https://github.com/coin-or/Ipopt).
 
 ~~~~~~~~~~~~~
 Installation:
 ~~~~~~~~~~~~~
-The GSFC EMTG team is primarily using Windows and the initial installation guide is written for Windows. EMTG is known to work for 
-Linux and should also work on Mac. 
+The GSFC EMTG team is primarily using Windows and the initial installation guide is written for Windows. 
 
-Navigate to the /docs/build_system/ directory for EMTG_*_build_system*.pdf documents detailing step-by-step instructions on how to 
-install the software dependencies and build EMTG. These documents are catered to specific software dependency versions. 
-Alternative versions may work but proceed at your own risk when deviating from the provided install guidance.
+The CU LASP team is primarily using Mac and Linux. The CMake build system has NOT been updated for the CU LASP fork, and small 
+modifications are likely necessary. To use IPOPT only, ensure compiler flag 'NOSNOPT' is set. To use SNOPT only, ensure 
+compiler flag 'NOIPOPT' is set. Reach out to the GSFC EMTG team for help modifying CMake build system. 
+
+To see instructions on the as-is cmake build system, Navigate to the /docs/build_system/ directory for EMTG_*_build_system*.pdf 
+documents detailing step-by-step instructions on how to install the software dependencies and build EMTG. These documents 
+are catered to specific software dependency versions. Alternative versions may work but proceed at your own risk when 
+deviating from the provided install guidance.
 
 ~~~~~~~~~~~~~
 Disclaimer:
 ~~~~~~~~~~~~~
 
-EMTG is provided "as is" but is in a capable state. The US Government, NASA, and the EMTG developers cannot guarantee that the results
-you produce with EMTG are correct. EMTG is intended for use as a trade study tool and an initial guess generator for a flight 
-navigation tool. 
+EMTG is provided "as is" but is in a capable state. The US Government, NASA, the University of Colorado and the EMTG developers 
+cannot guarantee that the results you produce with EMTG are correct. EMTG is intended for use as a trade study tool and an 
+initial guess generator for a flight navigation tool. 
 
 ======================================================================================================================================
 **************************************************************************************************************************************
@@ -68,7 +78,8 @@ Q: Will EMTG work on Linux?
 A: Yes, it will. Linux build instructions for the public are in development.
 
 Q: Will EMTG work on a Mac? If so, why is there not a Mac build document?
-A: Yes EMTG should work on a Mac. The development team did not have access to a Mac to be able to do development/testing.
+A: Yes EMTG works on a Mac. The GSFC development team did not have access to a Mac to be able to do development/testing and the
+CU LASP development team did not have the ability to test a reliable build system for it. 
 
 Q: Will EMTG work on my smart phone?
 A: We are not pursuing getting EMTG to run on a smart phone, but if you try it and it works, we'd love to hear about it!
@@ -77,7 +88,7 @@ Q: How frequently will you update EMTG?
 A: Resources are limited for the development team so open source releases will occure infrequently.
 
 Q: Can you make me an executable?
-A: No. EMTG depends on a number of third-party packages and NASA does not have the rights to distribute all of them.
+A: No. EMTG depends on a number of third-party packages and NASA/University of Colorado does not have the rights to distribute all of them.
 
 Q: Why doesn't my PyEMTG work?
 A: The various Python packages and libraries change fast and the development team has limited resources. The build system 
