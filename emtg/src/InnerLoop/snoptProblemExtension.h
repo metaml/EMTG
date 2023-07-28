@@ -6,6 +6,9 @@
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 // Licensed under the NASA Open Source License (the "License"); 
 // You may not use this file except in compliance with the License. 
 // You may obtain a copy of the License at:
@@ -28,6 +31,8 @@
 //
 //
 // ---------------------------------------------*/
+
+#ifndef NOSNOPT
 
 #pragma once
 
@@ -189,3 +194,4 @@ namespace EMTG
 
 
 #endif
+#endif // NOSNOPT

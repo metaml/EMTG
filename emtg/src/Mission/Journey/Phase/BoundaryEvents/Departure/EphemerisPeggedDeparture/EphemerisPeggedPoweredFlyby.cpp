@@ -6,6 +6,9 @@
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 // Licensed under the NASA Open Source License (the "License"); 
 // You may not use this file except in compliance with the License. 
 // You may obtain a copy of the License at:
@@ -39,7 +42,8 @@ namespace EMTG
                 myOptions,
                 PreviousPhaseArrivalEvent)
         {
-            this->hasBipropManeuver = true;
+            this->hasBipropManeuver = true;
+
             this->hasManeuver = true;
 
             this->dDeltavMagnitude_dVinfinity_in.resize(3, 1, 0.0);
@@ -527,24 +531,30 @@ namespace EMTG
 
             //where is the Sun?
             math::Matrix<doubleType> R_sc_Sun(3, 1, 0.0);
-            if (this->myUniverse->central_body_SPICE_ID == 10)            {
+            if (this->myUniverse->central_body_SPICE_ID == 10)
+            {
                 R_sc_Sun = this->state_after_event.getSubMatrix1D(0, 2);
             }
             else
             {
-                //where is the central body relative to the sun?
-                doubleType central_body_state_and_derivatives[12];
+                //where is the central body relative to the sun?
+
+                doubleType central_body_state_and_derivatives[12];
+
                 this->myUniverse->locate_central_body(this->state_after_event(7),
                     central_body_state_and_derivatives,
                     *this->myOptions,
-                    false);
+                    false);
+
                 math::Matrix<doubleType> R_CB_Sun(3, 1, 0.0);
                 for (size_t stateIndex = 0; stateIndex < 3; ++stateIndex)
                 {
                     R_CB_Sun(stateIndex) = central_body_state_and_derivatives[stateIndex];
-                }
+                }
+
                 R_sc_Sun = this->state_after_event.getSubMatrix1D(0, 2) + R_CB_Sun;
-            }
+            }
+
             this->mySpacecraft->computePowerState(R_sc_Sun.getSubMatrix1D(0, 2).norm() / this->myOptions->AU, this->state_after_event(7));
 
             //rotate the v-infinity vector to the local frame
@@ -560,11 +570,15 @@ namespace EMTG
             doubleType DEC = asin(VinfinityLocalFrame(2) / VinfinityLocalFrame.norm());
 
             //compute BdotR and BdotT
-            math::Matrix<doubleType> periapse_state = this->calculate_flyby_periapse_state();
-            this->myBplane.define_bplane(this->get_periapse_state());
-            this->BdotR = this->myBplane.getBdotR();
+            math::Matrix<doubleType> periapse_state = this->calculate_flyby_periapse_state();
+
+            this->myBplane.define_bplane(this->get_periapse_state());
+
+            this->BdotR = this->myBplane.getBdotR();
+
             this->BdotT = this->myBplane.getBdotT();
-
+
+
             double Isp = this->ChemicalManeuverType == PropulsionSystemChoice::Biprop ? this->mySpacecraft->getBipropIsp() : this->mySpacecraft->getMonopropIsp();
 
             write_output_line(outputfile,
@@ -614,60 +628,114 @@ namespace EMTG
             return periapse_state;
         }//end get_periapse_state()
 
-        void EphemerisPeggedPoweredFlyby::output_maneuver_and_target_spec(std::ofstream& maneuver_spec_file, std::ofstream& target_spec_file, bool& haveManeuverNeedTarget)
-        {
-            //in this case, we don't actually know the periapse state, so we'll use the approximated one that we already output in the .emtg file
-            math::Matrix<doubleType> periapse_state = this->get_periapse_state();
-
-            if (haveManeuverNeedTarget)
-            {
-                //reset the flag that tells us we need a target spec line
-                haveManeuverNeedTarget = false;
-
-                //Step 1: target spec
-
-                //Step 1.1: initialize a target spec object
-                this->myBplane.define_bplane(periapse_state);
-
-                target_spec_line myTargetSpecLine(this->name,
-                    "EME2000",
-                    this->myUniverse->central_body.name,
-                    this->state_after_event(7),
-                    this->state_after_event,
-                    this->myBplane.getBdotR(),
-                    this->myBplane.getBdotT());
-
-                //Step 1.2: write target spec object
-                myTargetSpecLine.write(target_spec_file);
-            }
-
-            //Step 2: maneuver spec
-            //Step 2.1: instantiate and populate a maneuver spec object
-            maneuver_spec_line myManeuverSpecLine(this->name);
-
-            double Isp = this->ChemicalManeuverType == PropulsionSystemChoice::Biprop ? this->mySpacecraft->getBipropIsp() : this->mySpacecraft->getMonopropIsp();
-            doubleType massFlowRate = this->mySpacecraft->getchemthrust() / Isp / this->myOptions->g0;
-            doubleType mass_before_maneuver = this->state_before_event(6) + this->chemical_fuel_used + this->chemical_oxidizer_used;
-            doubleType maneuverDuration = (mass_before_maneuver - this->state_before_event(6)) / massFlowRate;
-            
-            //maneuver direction is along track or anti-track, depending on the flyby delta-v 
-            math::Matrix<doubleType> periapse_maneuver_vector = periapse_state.getSubMatrix1D(3, 5).unitize() * this->FlybyDeltavSigned;
-
-            myManeuverSpecLine.append_maneuver_spec_item("EME2000",
-                this->state_before_event(7),
-                periapse_maneuver_vector.unitize(),
-                mass_before_maneuver,
-                this->state_before_event(6),
-                this->mySpacecraft->getchemthrust(),
-                massFlowRate,
-                maneuverDuration,
-                1.0);
-
-            //Step 2.2: write the maneuver spec
-            myManeuverSpecLine.write(maneuver_spec_file);
-
-            //Step 2.3: signal that we need a target spec
-            haveManeuverNeedTarget = true;
+        void EphemerisPeggedPoweredFlyby::output_maneuver_and_target_spec(std::ofstream& maneuver_spec_file, std::ofstream& target_spec_file, bool& haveManeuverNeedTarget)
+
+        {
+
+            //in this case, we don't actually know the periapse state, so we'll use the approximated one that we already output in the .emtg file
+
+            math::Matrix<doubleType> periapse_state = this->get_periapse_state();
+
+
+
+            if (haveManeuverNeedTarget)
+
+            {
+
+                //reset the flag that tells us we need a target spec line
+
+                haveManeuverNeedTarget = false;
+
+
+
+                //Step 1: target spec
+
+
+
+                //Step 1.1: initialize a target spec object
+
+                this->myBplane.define_bplane(periapse_state);
+
+
+
+                target_spec_line myTargetSpecLine(this->name,
+
+                    "EME2000",
+
+                    this->myUniverse->central_body.name,
+
+                    this->state_after_event(7),
+
+                    this->state_after_event,
+
+                    this->myBplane.getBdotR(),
+
+                    this->myBplane.getBdotT());
+
+
+
+                //Step 1.2: write target spec object
+
+                myTargetSpecLine.write(target_spec_file);
+
+            }
+
+
+
+            //Step 2: maneuver spec
+
+            //Step 2.1: instantiate and populate a maneuver spec object
+
+            maneuver_spec_line myManeuverSpecLine(this->name);
+
+
+
+            double Isp = this->ChemicalManeuverType == PropulsionSystemChoice::Biprop ? this->mySpacecraft->getBipropIsp() : this->mySpacecraft->getMonopropIsp();
+
+            doubleType massFlowRate = this->mySpacecraft->getchemthrust() / Isp / this->myOptions->g0;
+
+            doubleType mass_before_maneuver = this->state_before_event(6) + this->chemical_fuel_used + this->chemical_oxidizer_used;
+
+            doubleType maneuverDuration = (mass_before_maneuver - this->state_before_event(6)) / massFlowRate;
+
+            
+
+            //maneuver direction is along track or anti-track, depending on the flyby delta-v 
+
+            math::Matrix<doubleType> periapse_maneuver_vector = periapse_state.getSubMatrix1D(3, 5).unitize() * this->FlybyDeltavSigned;
+
+
+
+            myManeuverSpecLine.append_maneuver_spec_item("EME2000",
+
+                this->state_before_event(7),
+
+                periapse_maneuver_vector.unitize(),
+
+                mass_before_maneuver,
+
+                this->state_before_event(6),
+
+                this->mySpacecraft->getchemthrust(),
+
+                massFlowRate,
+
+                maneuverDuration,
+
+                1.0);
+
+
+
+            //Step 2.2: write the maneuver spec
+
+            myManeuverSpecLine.write(maneuver_spec_file);
+
+
+
+            //Step 2.3: signal that we need a target spec
+
+            haveManeuverNeedTarget = true;
+
         }//end output_maneuver_and_target_spec()
     }//end namespace BoundaryEvents
 }//end namespace EMTG

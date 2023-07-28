@@ -6,6 +6,9 @@
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 // Licensed under the NASA Open Source License (the "License"); 
 // You may not use this file except in compliance with the License. 
 // You may obtain a copy of the License at:
@@ -17,6 +20,7 @@
 // governing permissions and limitations under the License.
 
 //SNOPT interface
+#ifndef NOSNOPT
 
 #include "SNOPT_interface.h"
 #include <time.h>
@@ -27,9 +31,16 @@ namespace EMTG
     namespace Solvers
     {
         SNOPT_interface::SNOPT_interface(problem* myProblem,
-            const NLPoptions& myOptions) :
-            NLP_interface::NLP_interface(myProblem, myOptions)
+            const NLPoptions& myOptions)
+		{
+			this->initialize(myProblem,myOptions);
+		} // end constructor
+		
+		void SNOPT_interface::initialize(problem* myProblem,
+            const NLPoptions& myOptions)
         {
+			this->initialize_base(myProblem,myOptions);
+			
             //set up SNOPT-specific stuff
             //take advantage of what the base constructor has already done for us, but recognize that we have to change some things
             //obnoxiously, we have to change from size_t to SNOPT_INT_TYPE for iGfun/jGvar/iAfun/iAvar
@@ -165,7 +176,7 @@ namespace EMTG
 
             //set first feasibility flag
             this->first_feasibility = false;
-        }//end constructor
+        }//end initialize
 
         void SNOPT_interface::run_NLP(const bool& X0_is_scaled)
         {
@@ -560,3 +571,4 @@ namespace EMTG
         }
     }//end namespace Solvers
 }//end namespace EMTG
+#endif // NOSNOPT

@@ -6,6 +6,9 @@
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 // Licensed under the NASA Open Source License (the "License"); 
 // You may not use this file except in compliance with the License. 
 // You may obtain a copy of the License at:
@@ -24,7 +27,7 @@
 
 #include "problem.h"
 #include "EMTG_enums.h"
-#include "SNOPT_interface.h"
+#include "NLP_interface.h"
 #include "EMTG_innerloop_solution.h"
 
 #include <vector>
@@ -42,7 +45,7 @@ namespace EMTG
             //constructors
             FilamentWalker();
             FilamentWalker(problem* myProblem,
-                           SNOPT_interface* mySNOPT);
+                           NLP_interface* myNLP);
 
             //get/set
 
@@ -62,7 +65,7 @@ namespace EMTG
 
             //fields
             problem* myProblem;
-            SNOPT_interface* mySNOPT;
+            NLP_interface* myNLP;
             std::ofstream outputfile;
             size_t nX;
             bool WalkSoftly;

@@ -1,3 +1,6 @@
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 #define BOOST_PYTHON_STATIC_LIB
 
 #include "boost/python/module.hpp"

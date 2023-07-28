@@ -1,0 +1,16 @@
+~~~~~~~~~~~~~
+July 2023 - Version 9.02
+~~~~~~~~~~~~~
+
+Originator: Jeremy Knittel, jeremy.knittel@lasp.colorado.edu
+Alterations:
+1. Added University of Colorado copyright to all source code
+2. Added IPOPT interface
+3. Modified all code to use base NLP class instead of directly 
+calling SNOPT class except upon initialization when user 
+requests SNOPT
+4. Added NOIPOPT and NOSNOPT compiler flags to allow compiling 
+EMTG without one or the other
+5. Added LASP logo and had PyEMTG use it
+6. Override the left boundary on phase flight time because it 
+causes lots of problems to try and be smart about it. 

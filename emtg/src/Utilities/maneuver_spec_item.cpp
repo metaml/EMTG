@@ -1,3 +1,6 @@
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 //Jacob Englander 6/22/2018
 //maneuver spec item
 //this class is for one item that goes into an EMTG-MIRAGE maneuver spec line

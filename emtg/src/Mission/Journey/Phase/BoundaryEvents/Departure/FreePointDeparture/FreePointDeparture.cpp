@@ -6,6 +6,9 @@
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 // Licensed under the NASA Open Source License (the "License"); 
 // You may not use this file except in compliance with the License. 
 // You may obtain a copy of the License at:
@@ -273,27 +276,32 @@ namespace EMTG
                 this->state_before_event(6) = X[Xindex++];
 
                 //Step 2.5: propagate, if appropriate
-                doubleType PropagationTime = this->EventWaitTime + 1.0e-13;
+                doubleType PropagationTime = this->EventWaitTime + 1.0e-13;
+
                 if (this->AllowStateToPropagate)
                 {
                     this->total_number_of_states_to_integrate = needG
                         ? 10 + 13 * 13
-                        : 10;
+                        : 10;
+
                     //Step 2.5.1: copy the state to a temporary vector
                     this->StateBeforeEventBeforePropagation.shallow_copy(this->state_before_event, 8);
-                    this->StateBeforeEventBeforePropagation(7) = 0.0;                    
+                    this->StateBeforeEventBeforePropagation(7) = 0.0;                    
+
                     //epoch needs to *not* include wait time
                     for (size_t listIndex = 0; listIndex < this->Xindices_EventLeftEpoch.size() - 1; ++listIndex)
                     {
                         this->StateBeforeEventBeforePropagation(7) += X[this->Xindices_EventLeftEpoch[listIndex]];
-                    }
+                    }
+
                     //Step 2.5.2: then we need to propagate
                     this->dPropagatedStatedIndependentVariable.assign_zeros();
                     this->myPropagator->setCurrentEpoch(this->StateBeforeEventBeforePropagation(7));
                     this->myPropagator->setIndexOfEpochInStateVec(7);
                     this->myPropagator->setCurrentIndependentVariable(this->StateBeforeEventBeforePropagation(7));
                     this->myPropagator->propagate(PropagationTime, needG);
-                    this->state_before_event(7) = this->EventLeftEpoch;
+                    this->state_before_event(7) = this->EventLeftEpoch;
+
                     if (this->myPropagatorType == PropagatorType::IntegratedPropagator)
                     {
                         this->state_before_event(8) = 0.0; //chemical fuel - we're not actually moving the spacecraft, we're redefining a boundary point. So tankage does not change.
@@ -366,7 +374,8 @@ namespace EMTG
                                 }
                             }
 
-                            //wait time
+                            //wait time
+
                             if (this->myPropagatorType == PropagatorType::KeplerPropagator)
                                 std::get<2>(this->Derivatives_of_StateBeforeEvent_wrt_Time[this->dIndex_StateBeforeEvent_wrt_DecisionVariables_wrt_Time[departureStateIndex].back()]) = (PropagationTime >= 0.0 ? 1.0 : -1.0) * this->dPropagatedStatedIndependentVariable(departureStateIndex);
                             else
@@ -423,7 +432,8 @@ namespace EMTG
         void FreePointDeparture::output(std::ofstream& outputfile,
             const double& launchdate,
             size_t& eventcount)
-        {
+        {
+
             this->mySpacecraft->setActiveStage(this->stageIndex);
 
             if (this->myOptions->output_dormant_journeys && this->hasWaitTime)
@@ -443,8 +453,10 @@ namespace EMTG
 
                     //TODO compute wait-state for non-body boundary conditions, involves propagation
 
-                    //where is the Sun?
-                    math::Matrix<doubleType> R_sc_Sun(3, 1, 0.0);
+                    //where is the Sun?
+
+                    math::Matrix<doubleType> R_sc_Sun(3, 1, 0.0);
+
                     if (this->myUniverse->central_body_SPICE_ID == 10)
                     {
                         R_sc_Sun = waitState.getSubMatrix1D(0, 2);
@@ -456,15 +468,18 @@ namespace EMTG
                         this->myUniverse->locate_central_body(waitState(7),
                             central_body_state_and_derivatives,
                             *this->myOptions,
-                            false);
+                            false);
+
                         math::Matrix<doubleType> R_CB_Sun(3, 1, 0.0);
                         for (size_t stateIndex = 0; stateIndex < 3; ++stateIndex)
                         {
                             R_CB_Sun(stateIndex) = central_body_state_and_derivatives[stateIndex];
-                        }                                               
+                        }
+                                               
                         R_sc_Sun = waitState.getSubMatrix1D(0, 2) + R_CB_Sun;
                     }
-
+
+
                     this->mySpacecraft->computePowerState(R_sc_Sun.getSubMatrix1D(0, 2).norm() / this->myOptions->AU, waitState(7));
 
                     write_output_line(outputfile,
@@ -502,58 +517,99 @@ namespace EMTG
                 //Step 0: we'll need an output vector
                 math::Matrix<doubleType> output_state = this->StateBeforeEventBeforePropagation;
 
-                //Step 1: set output resolution
-                double EphemerisOutputResolution;
-                if (this->myJourneyOptions->override_integration_step_size)
-                    EphemerisOutputResolution = this->myJourneyOptions->integration_step_size;
-                else
+                //Step 1: set output resolution
+
+                double EphemerisOutputResolution;
+
+                if (this->myJourneyOptions->override_integration_step_size)
+
+                    EphemerisOutputResolution = this->myJourneyOptions->integration_step_size;
+
+                else
+
                     EphemerisOutputResolution = this->myOptions->integration_time_step_size;
 
                 //Step 2: output the wait time - we'll do this by integrating forward in time and plotapussing
-                //Step 2.1: temporarily assign the initial coast propagator to the output state
-                this->myPropagator->setStateRight(output_state);
-                this->myPropagator->setCurrentEpoch(this->StateBeforeEventBeforePropagation(7));
-                this->myPropagator->setIndexOfEpochInStateVec(7);
-                this->myPropagator->setCurrentIndependentVariable(this->StateBeforeEventBeforePropagation(7));
-
-                //Step 2.2: propagate and print, skipping the first and last entry
-                doubleType timeToPropagate = EphemerisOutputResolution;
-                doubleType totalPropagationTime = this->EventWaitTime;
-                while (timeToPropagate < totalPropagationTime)
-                {
-                    //Step 2.2.1: propagate
-                    this->myPropagator->setCurrentEpoch(this->StateBeforeEventBeforePropagation(7));
-                    this->myPropagator->setIndexOfEpochInStateVec(7);
-                    this->myPropagator->setCurrentIndependentVariable(this->StateBeforeEventBeforePropagation(7));
-                    this->myPropagator->propagate(timeToPropagate, false);
-                    output_state(7) = this->StateBeforeEventBeforePropagation(7) + timeToPropagate;
-
+                //Step 2.1: temporarily assign the initial coast propagator to the output state
+
+                this->myPropagator->setStateRight(output_state);
+
+                this->myPropagator->setCurrentEpoch(this->StateBeforeEventBeforePropagation(7));
+
+                this->myPropagator->setIndexOfEpochInStateVec(7);
+
+                this->myPropagator->setCurrentIndependentVariable(this->StateBeforeEventBeforePropagation(7));
+
+
+
+                //Step 2.2: propagate and print, skipping the first and last entry
+
+                doubleType timeToPropagate = EphemerisOutputResolution;
+
+                doubleType totalPropagationTime = this->EventWaitTime;
+
+                while (timeToPropagate < totalPropagationTime)
+
+                {
+
+                    //Step 2.2.1: propagate
+
+                    this->myPropagator->setCurrentEpoch(this->StateBeforeEventBeforePropagation(7));
+
+                    this->myPropagator->setIndexOfEpochInStateVec(7);
+
+                    this->myPropagator->setCurrentIndependentVariable(this->StateBeforeEventBeforePropagation(7));
+
+                    this->myPropagator->propagate(timeToPropagate, false);
+
+                    output_state(7) = this->StateBeforeEventBeforePropagation(7) + timeToPropagate;
+
+
+
                     //Step 2.2.2: convert to Sun-centered if necessary
                     if (this->myUniverse->central_body.spice_ID != this->myOptions->forward_integrated_ephemeris_central_body_SPICE_ID)
-                    {
+                    {
+
                         double LT_dump;
                         double bodyStateDouble[6];
                         spkez_c(this->myUniverse->central_body.spice_ID, output_state(7)_GETVALUE - (51544.5 * 86400.0), "J2000", "NONE", this->myOptions->forward_integrated_ephemeris_central_body_SPICE_ID, bodyStateDouble, &LT_dump);
 
                         for (size_t stateIndex = 0; stateIndex < 6; ++stateIndex)
                             output_state(stateIndex) += bodyStateDouble[stateIndex];
-                    }
-
-                    //Step 2.2.3: print
-                    if ((totalPropagationTime - timeToPropagate) > EphemerisOutputResolution)
-                        this->write_ephemeris_line(outputfile,
-                            output_state,
-                            math::Matrix<doubleType>(3, 1, 0.0),//control vector
-                            0.0,
-                            0.0,
-                            0.0,
-                            0,
-                            0.0,
-                            "none");
-
-                    //Step 2.2.4: increment propagatedEpoch
-                    timeToPropagate += (totalPropagationTime - timeToPropagate) > EphemerisOutputResolution
-                        ? EphemerisOutputResolution
+                    }
+
+
+
+                    //Step 2.2.3: print
+
+                    if ((totalPropagationTime - timeToPropagate) > EphemerisOutputResolution)
+
+                        this->write_ephemeris_line(outputfile,
+
+                            output_state,
+
+                            math::Matrix<doubleType>(3, 1, 0.0),//control vector
+
+                            0.0,
+
+                            0.0,
+
+                            0.0,
+
+                            0,
+
+                            0.0,
+
+                            "none");
+
+
+
+                    //Step 2.2.4: increment propagatedEpoch
+
+                    timeToPropagate += (totalPropagationTime - timeToPropagate) > EphemerisOutputResolution
+
+                        ? EphemerisOutputResolution
+
                         : (totalPropagationTime - timeToPropagate);
                 }
 

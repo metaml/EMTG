@@ -6,6 +6,9 @@
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 // Licensed under the NASA Open Source License (the "License"); 
 // You may not use this file except in compliance with the License. 
 // You may obtain a copy of the License at:
@@ -33,8 +36,11 @@ namespace EMTG
         public:
             //constructor
             NLP_interface();
-            NLP_interface(problem* myProblem, 
+            void initialize_base(problem* myProblem, 
                 const NLPoptions& myOptions);
+			
+			virtual void initialize(problem* myProblem, 
+                const NLPoptions& myOptions) = 0;
 
             //get/set
             inline void setX0_scaled(const std::vector<doubleType>& X0_scaled_in) {this->X0_scaled = X0_scaled_in; }

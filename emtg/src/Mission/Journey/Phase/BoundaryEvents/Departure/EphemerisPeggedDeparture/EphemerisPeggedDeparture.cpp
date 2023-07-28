@@ -6,6 +6,9 @@
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 // Licensed under the NASA Open Source License (the "License"); 
 // You may not use this file except in compliance with the License. 
 // You may obtain a copy of the License at:
@@ -233,7 +236,8 @@ namespace EMTG
 
 
                     //where is the Sun?
-                    math::Matrix<doubleType> R_sc_Sun(3, 1, 0.0);
+                    math::Matrix<doubleType> R_sc_Sun(3, 1, 0.0);
+
                     if (this->myUniverse->central_body_SPICE_ID == 10)
                     {
                         R_sc_Sun = waitState.getSubMatrix1D(0, 2);
@@ -245,14 +249,17 @@ namespace EMTG
                         this->myUniverse->locate_central_body(waitState(7),
                             central_body_state_and_derivatives,
                             *this->myOptions,
-                            false);
+                            false);
+
                         math::Matrix<doubleType> R_CB_Sun(3, 1, 0.0);
                         for (size_t stateIndex = 0; stateIndex < 3; ++stateIndex)
                         {
                             R_CB_Sun(stateIndex) = central_body_state_and_derivatives[stateIndex];
-                        }
+                        }
+
                         R_sc_Sun = waitState.getSubMatrix1D(0, 2) + R_CB_Sun;
-                    }
+                    }
+
                     this->mySpacecraft->computePowerState(R_sc_Sun.getSubMatrix1D(0, 2).norm() / this->myOptions->AU, waitState(7));
 
                     write_output_line(outputfile,
@@ -313,7 +320,8 @@ namespace EMTG
 
                     //make sure the state is in the sun-centered J2000 Earth equatorial frame
                     if (this->myUniverse->central_body.spice_ID != this->myOptions->forward_integrated_ephemeris_central_body_SPICE_ID)
-                    {
+                    {
+
                         double LT_dump;
                         double bodyStateDouble[6];
                         spkez_c(this->myUniverse->central_body.spice_ID, output_state(7)_GETVALUE - (51544.5 * 86400.0), "J2000", "NONE", this->myOptions->forward_integrated_ephemeris_central_body_SPICE_ID, bodyStateDouble, &LT_dump);
@@ -322,15 +330,24 @@ namespace EMTG
                             output_state(stateIndex) += bodyStateDouble[stateIndex];
                     }
 
-                    //print the state
-                    this->write_ephemeris_line(outputfile,
-                        output_state,
-                        math::Matrix<doubleType>(3, 1, 0.0),//control vector
-                        0.0,
-                        0.0,
-                        0.0,
-                        0,
-                        0.0,
+                    //print the state
+
+                    this->write_ephemeris_line(outputfile,
+
+                        output_state,
+
+                        math::Matrix<doubleType>(3, 1, 0.0),//control vector
+
+                        0.0,
+
+                        0.0,
+
+                        0.0,
+
+                        0,
+
+                        0.0,
+
                         "none");
 
                     //update the look back time
@@ -341,28 +358,50 @@ namespace EMTG
                 //now output the actual departure state
                 this->BoundaryEventBase::output_ephemeris(outputfile);
             }//end while loop over ephemeris lookback
-        }//end output_ephemeris()
-
-        void EphemerisPeggedDeparture::output_maneuver_and_target_spec(std::ofstream& maneuver_spec_file, std::ofstream& target_spec_file, bool& haveManeuverNeedTarget)
-        {
-            //The base-class version of this method assumes that there is NOT an arrival maneuver,
-            //and therefore does not write any lines in the maneuver spec
-            //it also assumes bplane target values of 0.0
-            if (haveManeuverNeedTarget)
-            {
-                //reset the flag that tells us we need a target spec line
-                haveManeuverNeedTarget = false;
-
-                //Step 1: initialize a target spec object
-                target_spec_line myTargetSpecLine(this->name,
-                    "EME2000",
-                    this->myUniverse->central_body.name,
-                    this->state_before_event(7),
-                    this->state_before_event);
-
-                //Step 2: write target spec object
-                myTargetSpecLine.write(target_spec_file);
-            }
+        }//end output_ephemeris()
+
+
+
+        void EphemerisPeggedDeparture::output_maneuver_and_target_spec(std::ofstream& maneuver_spec_file, std::ofstream& target_spec_file, bool& haveManeuverNeedTarget)
+
+        {
+
+            //The base-class version of this method assumes that there is NOT an arrival maneuver,
+
+            //and therefore does not write any lines in the maneuver spec
+
+            //it also assumes bplane target values of 0.0
+
+            if (haveManeuverNeedTarget)
+
+            {
+
+                //reset the flag that tells us we need a target spec line
+
+                haveManeuverNeedTarget = false;
+
+
+
+                //Step 1: initialize a target spec object
+
+                target_spec_line myTargetSpecLine(this->name,
+
+                    "EME2000",
+
+                    this->myUniverse->central_body.name,
+
+                    this->state_before_event(7),
+
+                    this->state_before_event);
+
+
+
+                //Step 2: write target spec object
+
+                myTargetSpecLine.write(target_spec_file);
+
+            }
+
         }//end output_maneuver_and_target_spec()
     }//end namespace BoundaryEvents
 }//end namespace EMTG

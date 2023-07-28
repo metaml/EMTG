@@ -36,7 +36,7 @@ class PyEMTG_interface(wx.Frame):
 
         self.read_PyEMTG_options_file()
         
-        icon = wx.Icon("clemonaut.ico", wx.BITMAP_TYPE_ICO)
+        icon = wx.Icon("lasp-logo.color.art-acronym.transp-bg.small.png", wx.BITMAP_TYPE_PNG)
         self.SetIcon(icon)
 
         self.initialize_GUI()

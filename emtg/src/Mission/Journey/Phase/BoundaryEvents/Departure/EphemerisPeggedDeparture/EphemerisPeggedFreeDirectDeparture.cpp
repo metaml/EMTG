@@ -7,6 +7,9 @@
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 // Licensed under the NASA Open Source License (the "License"); 
 // You may not use this file except in compliance with the License. 
 // You may obtain a copy of the License at:
@@ -105,14 +108,17 @@ namespace EMTG
                 this->myUniverse->locate_central_body(this->state_after_event(7),
                     central_body_state_and_derivatives,
                     *this->myOptions,
-                    false);                               
+                    false);
+                               
                 math::Matrix<doubleType> R_CB_Sun(3, 1, 0.0);
                 for (size_t stateIndex = 0; stateIndex < 3; ++stateIndex)
                 {
                     R_CB_Sun(stateIndex) = central_body_state_and_derivatives[stateIndex];
-                }                               
+                }
+                               
                 R_sc_Sun = this->state_after_event.getSubMatrix1D(0, 2) + R_CB_Sun;
-            }                        
+            }
+                        
             this->mySpacecraft->computePowerState(R_sc_Sun.getSubMatrix1D(0, 2).norm() / this->myOptions->AU, this->state_after_event(7));
 
             write_output_line(outputfile,

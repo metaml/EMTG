@@ -6,6 +6,9 @@
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 // Licensed under the NASA Open Source License (the "License"); 
 // You may not use this file except in compliance with the License.
 // You may obtain a copy of the License at:
@@ -30,50 +33,29 @@
 #include "monotonic_basin_hopping.h"
 #include "EMTG_math.h"
 
+#ifndef NOSNOPT
 #include "snoptProblemExtension.h"
+#endif
 
 namespace EMTG { namespace Solvers {
     //constructors
     MBH::MBH() {}
 
     MBH::MBH(EMTG::problem* myProblem,
-        SNOPT_interface* mySNOPT)
+        NLP_interface* myNLP)
     {
         //initialize the MBH variables
-        initialize(myProblem, mySNOPT);
-
-        //search through the problem object and identify which decision variables are flight time variables
-        if (this->myProblem->options.MBH_time_hop_probability > 0.0)
-        {
-            for (int entry = 0; entry < this->myProblem->total_number_of_NLP_parameters; ++entry)
-                if (this->myProblem->Xdescriptions[entry].find("flight time") < 1024)
-                {
-                    this->time_variable_indices.push_back(entry);
-                }
-        }
-
-        //search through the problem object and identify which decision variables are significant (i.e. non-control)
-        if (this->myProblem->options.MBH_time_hop_probability > 0.0)
-        {
-            for (int entry = 0; entry < this->myProblem->total_number_of_NLP_parameters; ++entry)
-                if ( !(myProblem->Xdescriptions[entry].find("u_x") < 1024 
-                    || myProblem->Xdescriptions[entry].find("u_y") < 1024 
-                    || myProblem->Xdescriptions[entry].find("u_z") < 1024 
-                    || myProblem->Xdescriptions[entry].find("u_command") < 1024) )
-                {
-                    this->significant_variable_indices.push_back(entry);
-                }
-        }
+        initialize(myProblem, myNLP);
     }
 
     
     //method to initialize the MBH solver
     //resets all storage fields
     void MBH::initialize(EMTG::problem* myProblem,
-        SNOPT_interface* mySNOPT)
+        NLP_interface* myNLP)
     {
         this->myProblem = myProblem;
-        this->mySNOPT = mySNOPT;
+        this->myNLP = myNLP;
         
         //size the storage vectors
         this->archive.clear();
@@ -96,6 +78,29 @@ namespace EMTG { namespace Solvers {
             this->RNG.seed();
         else
             this->RNG.seed(this->myProblem->options.MBH_RNG_seed);
+		
+        //search through the problem object and identify which decision variables are flight time variables
+        if (this->myProblem->options.MBH_time_hop_probability > 0.0)
+        {
+            for (int entry = 0; entry < this->myProblem->total_number_of_NLP_parameters; ++entry)
+                if (this->myProblem->Xdescriptions[entry].find("flight time") < 1024)
+                {
+                    this->time_variable_indices.push_back(entry);
+                }
+        }
+
+        //search through the problem object and identify which decision variables are significant (i.e. non-control)
+        if (this->myProblem->options.MBH_time_hop_probability > 0.0)
+        {
+            for (int entry = 0; entry < this->myProblem->total_number_of_NLP_parameters; ++entry)
+                if ( !(myProblem->Xdescriptions[entry].find("u_x") < 1024 
+                    || myProblem->Xdescriptions[entry].find("u_y") < 1024 
+                    || myProblem->Xdescriptions[entry].find("u_z") < 1024 
+                    || myProblem->Xdescriptions[entry].find("u_command") < 1024) )
+                {
+                    this->significant_variable_indices.push_back(entry);
+                }
+        }
     }
 
     //function to reset to a new point, either at the beginning of the myProblem or when a certain number of failures is reached
@@ -285,7 +290,7 @@ namespace EMTG { namespace Solvers {
         for (size_t Xindex = 0; Xindex < this->myProblem->total_number_of_NLP_parameters; ++Xindex)
             this->X_after_hop_unscaled[Xindex] = this->X_after_hop[Xindex] * this->myProblem->X_scale_factors[Xindex];
         
-        this->mySNOPT->setX0_unscaled(this->X_after_hop_unscaled);
+        this->myNLP->setX0_unscaled(this->X_after_hop_unscaled);
 
         //print the sparsity file and XF files if this is the first pass, otherwise don't to save time and hard drive cycles
         if (!this->printed_sparsity)
@@ -313,7 +318,7 @@ namespace EMTG { namespace Solvers {
         }
         else
         {
-            //run SNOPT
+            //run SNOPT or SNOPT
             
             try
             {
@@ -330,10 +335,10 @@ namespace EMTG { namespace Solvers {
 						this->myProblem->G,
 						0);
 				}
+				
+                this->myNLP->run_NLP(false);
 
-                this->mySNOPT->run_NLP(false);
-
-                this->X_after_slide_unscaled = this->mySNOPT->getX_unscaled();
+                this->X_after_slide_unscaled = this->myNLP->getX_unscaled();
                 for (size_t Xindex = 0; Xindex < this->myProblem->total_number_of_NLP_parameters; ++Xindex)
                 {
                     this->X_after_slide[Xindex] = this->X_after_slide_unscaled[Xindex] / this->myProblem->X_scale_factors[Xindex];
@@ -344,13 +349,13 @@ namespace EMTG { namespace Solvers {
             {
                 std::cout << error.what() << std::endl;
                 //prevent a crash, yay
-                this->X_after_slide_unscaled = this->mySNOPT->getX_unscaled();
+                this->X_after_slide_unscaled = this->myNLP->getX_unscaled();
                 for (size_t Xindex = 0; Xindex < this->myProblem->total_number_of_NLP_parameters; ++Xindex)
                 {
                     this->X_after_slide[Xindex] = this->X_after_slide_unscaled[Xindex] / this->myProblem->X_scale_factors[Xindex];
                 }
 
-                std::cout << "SNOPT has crashed on mission " << myProblem->options.description << ". Creating dumpfile." << std::endl;
+                std::cout << "NLP has crashed on mission " << myProblem->options.description << ". Creating dumpfile." << std::endl;
                 std::stringstream dumpstream;
                 dumpstream << myProblem->options.working_directory << "//" << myProblem->options.mission_name << "_" << myProblem->options.description << ".SNOPTcrash";
                 std::ofstream dumpfile(dumpstream.str().c_str(), std::ios::out | std::ios::trunc);
@@ -491,7 +496,7 @@ namespace EMTG { namespace Solvers {
             //Step 2: apply the slide operator      
             this->slide();
             double ObjectiveFunctionValue = this->myProblem->F[0];
-            std::vector<double> Xunscaled = this->mySNOPT->getX_unscaled();
+            std::vector<double> Xunscaled = this->myNLP->getX_unscaled();
             std::vector<double> F = this->myProblem->F;
 
             //Step 3: determine if the new trial point is feasible and if so, operate on it
@@ -538,8 +543,9 @@ namespace EMTG { namespace Solvers {
             }
             else
             {
-                if ((normalized_feasibility < myProblem->options.snopt_feasibility_tolerance && decision_variable_infeasibility < myProblem->options.snopt_feasibility_tolerance)
-                    || this->mySNOPT->getInform() < 10)
+                if (normalized_feasibility < myProblem->options.snopt_feasibility_tolerance && decision_variable_infeasibility < myProblem->options.snopt_feasibility_tolerance)
+					// IPOPT doesnt do this so would need to make this generic
+                    //|| this->myNLP->getInform() < 10)
                     isFeasible = true;
             }
 

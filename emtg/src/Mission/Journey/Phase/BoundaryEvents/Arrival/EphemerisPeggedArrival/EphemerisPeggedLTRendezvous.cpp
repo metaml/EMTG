@@ -7,6 +7,9 @@
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 // Licensed under the NASA Open Source License (the "License"); 
 // You may not use this file except in compliance with the License. 
 // You may obtain a copy of the License at:
@@ -79,26 +82,40 @@ namespace EMTG
             this->process_event_right_side(X, Xindex, F, Findex, G, needG);
 
             this->BoundaryEventBase::process_specialized_constraints(X, Xindex, F, Findex, G, needG);
-        }//end process_event
-
-        void EphemerisPeggedLTRendezvous::process_event_right_side(const std::vector<doubleType>& X,
-            size_t& Xindex,
-            std::vector<doubleType>& F,
-            size_t& Findex,
-            std::vector<double>& G,
-            const bool& needG)
-        {
-            //base class
-            this->EphemerisPeggedArrival::process_event_right_side(X, Xindex, F, Findex, G, needG);
-
-            std::get<2>(this->Derivatives_of_StateAfterEvent[this->dIndex_mass_wrt_encodedMass]) = this->ETM(6, 6);
+        }//end process_event
+
+
+
+        void EphemerisPeggedLTRendezvous::process_event_right_side(const std::vector<doubleType>& X,
+
+            size_t& Xindex,
+
+            std::vector<doubleType>& F,
+
+            size_t& Findex,
+
+            std::vector<double>& G,
+
+            const bool& needG)
+
+        {
+
+            //base class
+
+            this->EphemerisPeggedArrival::process_event_right_side(X, Xindex, F, Findex, G, needG);
+
+
+
+            std::get<2>(this->Derivatives_of_StateAfterEvent[this->dIndex_mass_wrt_encodedMass]) = this->ETM(6, 6);
+
         }//end process_event_right_side()
 
         //******************************************output methods
         void EphemerisPeggedLTRendezvous::output(std::ofstream& outputfile,
             const double& launchdate,
             size_t& eventcount)
-        {
+        {
+
             this->mySpacecraft->setActiveStage(this->stageIndex);
 
             std::string event_type = "LT_rndzvs";
@@ -107,26 +124,32 @@ namespace EMTG
 
             math::Matrix<doubleType> empty3vector(3, 1, 0.0);
 
-            //where is the Sun?
-            math::Matrix<doubleType> R_sc_Sun(3, 1, 0.0);
+            //where is the Sun?
+
+            math::Matrix<doubleType> R_sc_Sun(3, 1, 0.0);
+
             if (this->myUniverse->central_body_SPICE_ID == 10)
             {
                 R_sc_Sun = this->state_after_event.getSubMatrix1D(0, 2);
             }
             else
-            {                //where is the central body relative to the sun?
+            {
+                //where is the central body relative to the sun?
                 doubleType central_body_state_and_derivatives[12];
                 this->myUniverse->locate_central_body(this->state_after_event(7),
                     central_body_state_and_derivatives,
                     *this->myOptions,
-                    false);
+                    false);
+
                 math::Matrix<doubleType> R_CB_Sun(3, 1, 0.0);
                 for (size_t stateIndex = 0; stateIndex < 3; ++stateIndex)
                 {
                     R_CB_Sun(stateIndex) = central_body_state_and_derivatives[stateIndex];
-                }
+                }
+
                 R_sc_Sun = this->state_after_event.getSubMatrix1D(0, 2) + R_CB_Sun;
-            }                       
+            }
+                       
             this->mySpacecraft->computePowerState(R_sc_Sun.getSubMatrix1D(0, 2).norm() / this->myOptions->AU, this->state_after_event(7));
 
             write_output_line(outputfile,
@@ -154,27 +177,48 @@ namespace EMTG
 
             //output end of mission if appropriate
             this->EphemerisPeggedArrival::output(outputfile, launchdate, eventcount);
-        }//end output()
-
-        void EphemerisPeggedLTRendezvous::output_maneuver_and_target_spec(std::ofstream& maneuver_spec_file, std::ofstream& target_spec_file, bool& haveManeuverNeedTarget)
-        {
-            //The base-class version of this method assumes that there is NOT an arrival maneuver,
-            //and therefore does not write any lines in the maneuver spec
-            if (haveManeuverNeedTarget)
-            {
-                //reset the flag that tells us we need a target spec line
-                haveManeuverNeedTarget = false;
-
-                //Step 1: initialize a target spec object
-                target_spec_line myTargetSpecLine(this->name,
-                    "EME2000",
-                    this->myUniverse->central_body.name,
-                    this->state_after_event(7),
-                    this->state_after_event);
-
-                //Step 2: write target spec object
-                myTargetSpecLine.write(target_spec_file);
-            }
+        }//end output()
+
+
+
+        void EphemerisPeggedLTRendezvous::output_maneuver_and_target_spec(std::ofstream& maneuver_spec_file, std::ofstream& target_spec_file, bool& haveManeuverNeedTarget)
+
+        {
+
+            //The base-class version of this method assumes that there is NOT an arrival maneuver,
+
+            //and therefore does not write any lines in the maneuver spec
+
+            if (haveManeuverNeedTarget)
+
+            {
+
+                //reset the flag that tells us we need a target spec line
+
+                haveManeuverNeedTarget = false;
+
+
+
+                //Step 1: initialize a target spec object
+
+                target_spec_line myTargetSpecLine(this->name,
+
+                    "EME2000",
+
+                    this->myUniverse->central_body.name,
+
+                    this->state_after_event(7),
+
+                    this->state_after_event);
+
+
+
+                //Step 2: write target spec object
+
+                myTargetSpecLine.write(target_spec_file);
+
+            }
+
         }//end output_maneuver_and_target_spec()
     }//end namespace BoundaryEvents
 }//end namespace EMTG

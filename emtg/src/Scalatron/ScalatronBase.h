@@ -1,3 +1,6 @@
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 //base Scalatron class
 //for use with EMTG and CSALT
 //Jacob Englander 8/15/2018

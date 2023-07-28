@@ -6,6 +6,9 @@
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 // Licensed under the NASA Open Source License (the "License"); 
 // You may not use this file except in compliance with the License. 
 // You may obtain a copy of the License at:
@@ -924,6 +927,10 @@ namespace EMTG
             //make sure the upper bound on the phase flight time does not exceed the upper bound on the journey flight time or journey aggregate flight time
             if ((this->myJourneyOptions->timebounded == 1 || this->myJourneyOptions->timebounded == 3) && Xupperbounds->back() > this->myJourneyOptions->flight_time_bounds[1])
                 Xupperbounds->back() = this->myJourneyOptions->flight_time_bounds[1];
+			
+			// The above causes tons of problems, so I like it set to 1 no matter what.
+			// 7/2028 JMK
+			Xlowerbounds->back() = 1.0;
 
             Xdescriptions->push_back(prefix + "phase flight time");
             X_scale_factors->push_back(this->myUniverse->TU);

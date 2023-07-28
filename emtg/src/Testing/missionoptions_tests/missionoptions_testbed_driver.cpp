@@ -1,3 +1,6 @@
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 //test driver for new missionoptions
 //Jacob Englander 1/9/2019
 

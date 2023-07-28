@@ -6,6 +6,9 @@
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 // Licensed under the NASA Open Source License (the "License"); 
 // You may not use this file except in compliance with the License. 
 // You may obtain a copy of the License at:
@@ -30,18 +33,19 @@ namespace EMTG
             nF(1)
         {}
 
-        EMTG::Solvers::NLP_interface::NLP_interface(problem* myProblem_in,
-            const NLPoptions& myOptions) :
-            myProblem(myProblem_in),
-            myOptions(myOptions),
-            nX(myProblem->total_number_of_NLP_parameters),
-            nF(myProblem->total_number_of_constraints),
-            nG(myProblem->Gdescriptions.size()),
-            nA(myProblem->Adescriptions.size()),
-            J_NLP_incumbent(math::LARGE),
-            feasibility_metric_NLP_incumbent(math::LARGE)
-        {
+        void EMTG::Solvers::NLP_interface::initialize_base(problem* myProblem_in,
+            const NLPoptions& myOptions)
 
+        {
+            this->myProblem = myProblem_in;
+            this->myOptions = myOptions;
+            this->nX = myProblem->total_number_of_NLP_parameters;
+            this->nF = myProblem->total_number_of_constraints;
+            this->nG = myProblem->Gdescriptions.size();
+            this->nA = myProblem->Adescriptions.size();
+            this->J_NLP_incumbent = math::LARGE;
+            this->feasibility_metric_NLP_incumbent = math::LARGE;
+				
             this->X0_scaled = std::vector<doubleType>(nX, 0.0);
             this->X0_unscaled = std::vector<doubleType>(nX, 0.0);
             this->X_scaled = std::vector<doubleType>(nX, 0.0);

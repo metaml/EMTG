@@ -1,3 +1,6 @@
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 //SplineEphem body
 //this is where the real work gets done
 //Jacob Englander 11-8-2016

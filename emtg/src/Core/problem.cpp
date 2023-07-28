@@ -6,6 +6,9 @@
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 // Licensed under the NASA Open Source License (the "License"); 
 // You may not use this file except in compliance with the License. 
 // You may obtain a copy of the License at:
@@ -26,7 +29,12 @@
 
 #include "problem.h"
 #include "monotonic_basin_hopping.h"
+#ifndef NOSNOPT
 #include "SNOPT_interface.h"
+#endif
+#ifndef NOIPOPT
+#include "IPOPT_interface.h"
+#endif
 #include "NLPoptions.h"
 #include "FilamentWalker.h"
 #include "EMTG_math.h"
@@ -160,9 +168,39 @@ namespace EMTG
             case InnerLoopSolverType::MBH: //run MBH
             {
                 Solvers::NLPoptions myNLPoptions(this->options);
+				
+				Solvers::NLP_interface *myNLP;
+				EMTG::Solvers::MBH solver;
+					
+		        if (this->options.NLP_solver_type == 1)
+		        {
+		            std::cout << "WORHP interface is deprecated" << std::endl;
+		        }
+		        else if (this->options.NLP_solver_type == 2 || this->options.NLP_solver_type == 3)
+		        {
+#ifdef NOIPOPT
+					std::cout << "IPOPT interface is not installed. Turn off NOIPOPT compiler flag if you would like to use it."
+#else
+					// IPOPT
+					myNLP = new Solvers::IPOPT_interface();
+#endif
+		        }
+		        else if (this->options.NLP_solver_type == 0)
+		        {
+#ifdef NOSNOPT
+		            std::cout << "SNOPT interface is not installed. Turn off NOSNOPT compiler flag if you would like to use it." << std::endl;
+#else
+					// SNOPT
+					myNLP = new Solvers::SNOPT_interface();
+#endif
+				}
+				else
+				{
+					throw std::runtime_error("Unknown NLP solver type");
+				}
 
-                Solvers::SNOPT_interface mySNOPT(this, myNLPoptions);
-                EMTG::Solvers::MBH solver(this, &mySNOPT);
+                myNLP->initialize(this, myNLPoptions);
+                solver.initialize(this, myNLP);
 
                 if (options.seed_MBH)
                 {
@@ -239,10 +277,39 @@ namespace EMTG
                 }
 
                 Solvers::NLPoptions myNLPoptions(this->options);
+				
+				Solvers::NLP_interface *myNLP;
+					
+		        if (this->options.NLP_solver_type == 1)
+		        {
+		            std::cout << "WORHP interface is deprecated" << std::endl;
+		        }
+		        else if (this->options.NLP_solver_type == 2 || this->options.NLP_solver_type == 3)
+		        {
+#ifdef NOIPOPT
+		            std::cout << "IPOPT interface is not installed. Turn off NOSNOPT compiler flag if you would like to use it." << std::endl;
+#else
+					// IPOPT
+					myNLP = new Solvers::IPOPT_interface();
+#endif
+		        }
+		        else if (this->options.NLP_solver_type == 0)
+		        {
+#ifdef NOSNOPT
+		            std::cout << "SNOPT interface is not installed. Turn off NOSNOPT compiler flag if you would like to use it." << std::endl;
+#else
+					// SNOPT
+					myNLP = new Solvers::SNOPT_interface();
+#endif
+				}
+				else
+				{
+					throw std::runtime_error("Unknown NLP solver type");
+				}
 
-                Solvers::SNOPT_interface mySNOPT(this, myNLPoptions);
-
-                mySNOPT.setX0_unscaled(this->options.current_trialX);
+                myNLP->initialize(this, myNLPoptions);
+				
+                myNLP->setX0_unscaled(this->options.current_trialX);
                 
 				try
 				{
@@ -269,9 +336,9 @@ namespace EMTG
 						0);
 				}
 
-                mySNOPT.run_NLP(false);
+                myNLP->run_NLP(false);
 
-                this->Xopt = mySNOPT.getX_unscaled();
+                this->Xopt = myNLP->getX_unscaled();
                 try
                 {
                     this->evaluate(this->Xopt, this->F, this->G, false);
@@ -358,10 +425,13 @@ namespace EMTG
 
                 //do filament walker things
                 Solvers::NLPoptions myNLPoptions(this->options);
-
+#ifdef NOSNOPT
+	            std::cout << "SNOPT interface is not installed. Turn off NOSNOPT compiler flag if you would like to use it." << std::endl;
+#else
                 Solvers::SNOPT_interface mySNOPT(this, myNLPoptions);
                 Solvers::FilamentWalker myFilamentWalker(this, &mySNOPT);
                 myFilamentWalker.walk();
+#endif
 
                 //write the output - but right now filament walkers don't really have output
                 //we have to fake Xopt so we don't get a crash

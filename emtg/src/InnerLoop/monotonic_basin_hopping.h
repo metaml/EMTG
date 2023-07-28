@@ -6,6 +6,9 @@
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 // Licensed under the NASA Open Source License (the "License"); 
 // You may not use this file except in compliance with the License. 
 // You may obtain a copy of the License at:
@@ -24,8 +27,9 @@
 
 #include "randutils.hpp"
 
-#include "SNOPT_interface.h"
 #include "EMTG_innerloop_solution.h"
+
+#include "NLP_interface.h"
 
 #pragma once
 
@@ -40,14 +44,14 @@ namespace EMTG
             //constructor
             MBH();
             MBH(EMTG::problem* myProblem,
-                SNOPT_interface* mySNOPT);
+                NLP_interface* myNLP);
 
             //destructor
             virtual ~MBH() {};
 
             //methods
             void initialize(EMTG::problem* Problem_input,
-                SNOPT_interface* mySNOPT);
+                NLP_interface* myNLP);
             void reset_point();
             void seed(std::vector<double>& seed_vector);
             void slide();
@@ -118,8 +122,8 @@ namespace EMTG
             //random number generator
             randutils::mt19937_rng RNG;
 
-            //SNOPT object
-            SNOPT_interface* mySNOPT;
+            //NLP object
+            NLP_interface* myNLP;
         };
 
 

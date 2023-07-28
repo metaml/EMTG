@@ -1,3 +1,6 @@
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 //Jacob Englander 6/22/2018
 //target spec line
 //this class is for one EMTG-MIRAGE target spec line

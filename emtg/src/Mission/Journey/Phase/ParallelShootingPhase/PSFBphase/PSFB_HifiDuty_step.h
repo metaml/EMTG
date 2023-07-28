@@ -1,3 +1,6 @@
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 //parallel shooting finite burn (PSFB) step for EMTGv9
 //High-fidelity duty cycle
 //Jacob Englander 3-19-2018

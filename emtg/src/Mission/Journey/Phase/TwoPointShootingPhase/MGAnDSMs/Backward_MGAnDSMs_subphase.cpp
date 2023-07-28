@@ -6,6 +6,9 @@
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 // Licensed under the NASA Open Source License (the "License"); 
 // You may not use this file except in compliance with the License. 
 // You may obtain a copy of the License at:
@@ -377,7 +380,8 @@ namespace EMTG
                 SPTM(7, 11) = PhaseFlightTime _GETVALUE;
 
                 //Step 6.3: mass
-                SPTM(6, 6) = (StateAfterPropagationBeforeDSM(6) / state_after_subphase(6)) _GETVALUE;                 SPTM(6, 10) *= SPTM(6, 6);
+                SPTM(6, 6) = (StateAfterPropagationBeforeDSM(6) / state_after_subphase(6)) _GETVALUE; 
+                SPTM(6, 10) *= SPTM(6, 6);
                 SPTM(6, 11) *= SPTM(6, 6);
 
                 if (this->myOptions->trackACS)
@@ -390,7 +394,8 @@ namespace EMTG
                 //derivatives of virtual fuel
                 SPTM(8, 6) = -((this->chemical_fuel_used - this->ACS_fuel_used - math::SMALL) / state_after_subphase(6)) _GETVALUE;
                 SPTM(8, 10) = SPTM(6, 10) * this->mySpacecraft->get_dFuelConsumedThisManeuver_dMassAtManeuver();
-                SPTM(8, 11) = SPTM(6, 10) * this->mySpacecraft->get_dFuelConsumedThisManeuver_dMassAtManeuver() * (PhaseFlightTime / this->BurnIndex) _GETVALUE;
+                SPTM(8, 11) = SPTM(6, 10) * this->mySpacecraft->get_dFuelConsumedThisManeuver_dMassAtManeuver() * (PhaseFlightTime / this->BurnIndex) _GETVALUE;
+
                 if (this->myOptions->trackACS)
                 {
                     SPTM(8, 10) += -(this->BurnIndex * this->myOptions->ACS_kg_per_day / 86400.0)_GETVALUE;

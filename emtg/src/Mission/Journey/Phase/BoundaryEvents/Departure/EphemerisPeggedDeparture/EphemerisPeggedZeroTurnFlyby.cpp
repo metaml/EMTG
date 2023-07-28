@@ -7,6 +7,9 @@
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 // Licensed under the NASA Open Source License (the "License"); 
 // You may not use this file except in compliance with the License. 
 // You may obtain a copy of the License at:
@@ -169,13 +172,17 @@ namespace EMTG
                 this->myUniverse->locate_central_body(this->state_after_event(7),
                     central_body_state_and_derivatives,
                     *this->myOptions,
-                    false);
-                math::Matrix<doubleType> R_CB_Sun(3, 1, 0.0);                for (size_t stateIndex = 0; stateIndex < 3; ++stateIndex)
+                    false);
+
+                math::Matrix<doubleType> R_CB_Sun(3, 1, 0.0);
+                for (size_t stateIndex = 0; stateIndex < 3; ++stateIndex)
                 {
                     R_CB_Sun(stateIndex) = central_body_state_and_derivatives[stateIndex];
-                }
+                }
+
                 R_sc_Sun = this->state_after_event.getSubMatrix1D(0, 2) + R_CB_Sun;
-            }            
+            }
+            
             this->mySpacecraft->computePowerState(R_sc_Sun.getSubMatrix1D(0, 2).norm() / this->myOptions->AU, this->state_after_event(7));
 
             //compute RA and DEC for incoming asymptote in the body's local frame
@@ -190,13 +197,20 @@ namespace EMTG
 
             //compute RA and DEC
             RA = atan2(VinfinityLocalFrame(1), VinfinityLocalFrame(0));
-            DEC = asin(VinfinityLocalFrame(2) / VinfinityLocalFrame.norm());
-
-            //BdotT and BdotR
-            Astrodynamics::bplane myBplane(this->myUniverse->central_body.mu);
-            math::Matrix<doubleType> periapse_state = this->get_periapse_state().vert_cat(math::Matrix<doubleType>(1, 1, this->state_before_event(6)));
-            this->myBplane.define_bplane_without_bend_angle(periapse_state, this->Vinfinity_in);
-            this->BdotR = this->myBplane.getBdotR();
+            DEC = asin(VinfinityLocalFrame(2) / VinfinityLocalFrame.norm());
+
+
+
+            //BdotT and BdotR
+
+            Astrodynamics::bplane myBplane(this->myUniverse->central_body.mu);
+
+            math::Matrix<doubleType> periapse_state = this->get_periapse_state().vert_cat(math::Matrix<doubleType>(1, 1, this->state_before_event(6)));
+
+            this->myBplane.define_bplane_without_bend_angle(periapse_state, this->Vinfinity_in);
+
+            this->BdotR = this->myBplane.getBdotR();
+
             this->BdotT = this->myBplane.getBdotT();
 
             write_output_line(outputfile,
@@ -231,54 +245,102 @@ namespace EMTG
             //therefore this code is derived from the Python code that we used in Lucy Phase B
 
             math::Matrix<doubleType> periapse_position(3, 1, 0.0);
-
-            //get the vector to the Sun
-            math::Matrix<doubleType> vector_to_sun(3, 1, 0.0);
-            math::Matrix<doubleType> velocity_relative_to_sun(3, 1, 0.0);
-            if (this->myUniverse->central_body.spice_ID == 10)
-            {
-                //the central body is the sun, so the vector to the sun is just the negative of the target body's position vector
-                vector_to_sun = -this->state_before_event.getSubMatrix1D(0, 2);
-                velocity_relative_to_sun = this->state_before_event.getSubMatrix1D(3, 5);
-            }
-            else
-            {
-                //the central body is not the sun, so we need to locate the central body relative to the sun and then add it to the target body's position vector
-                //and then negate the whole thing
-                doubleType central_body_state[12];
-                this->myUniverse->locate_central_body(this->state_before_event(7),
-                    central_body_state,
-                    *this->myOptions,
-                    false);
-
-                for (size_t stateIndex : {0, 1, 2})
-                {
-                    vector_to_sun(stateIndex) = -(central_body_state[stateIndex] + this->state_before_event(stateIndex));
-                    velocity_relative_to_sun(stateIndex) = central_body_state[stateIndex + 3] + this->state_before_event(stateIndex + 3);
-                }
-            }
-
-            
-            //mimic what we did in Phase B, for testing
-            //compute the basis vectors of the target frame
-            Astrodynamics::frame EclipticFrame;
-            EclipticFrame.initialize_ecliptic();
-            math::Matrix<doubleType> Vinf_ecliptic = EclipticFrame.get_R_from_ICRF_to_J2000BCI() * this->Vinfinity_in;
-            math::Matrix<doubleType> RtoSun_ecliptic = EclipticFrame.get_R_from_ICRF_to_J2000BCI() * vector_to_sun;
-            math::Matrix<doubleType> Xhat = Vinf_ecliptic.unitize();
-            math::Matrix<doubleType> Yhat = RtoSun_ecliptic.unitcross(Xhat);
-            math::Matrix<doubleType> Zhat = Xhat.unitcross(Yhat);
-
-            math::Matrix<doubleType> R_from_Ecliptic_to_Target = Xhat.horz_cat(Yhat.horz_cat(Zhat));
-
-            math::Matrix<doubleType> R_from_Target_to_Ecliptic = R_from_Ecliptic_to_Target.transpose();
-
-            math::Matrix<doubleType> rp_ecliptic = R_from_Target_to_Ecliptic * math::Matrix<doubleType>(3, 1, std::vector<doubleType>({ 0.0, 0.0, this->myJourneyOptions->zero_turn_flyby_distance }));
-
-            math::Matrix<doubleType> rp_ICRF = EclipticFrame.get_R_from_J2000BCI_to_ICRF() * rp_ecliptic;
-
-            //********************************************now the real way
-
+
+
+            //get the vector to the Sun
+
+            math::Matrix<doubleType> vector_to_sun(3, 1, 0.0);
+
+            math::Matrix<doubleType> velocity_relative_to_sun(3, 1, 0.0);
+
+            if (this->myUniverse->central_body.spice_ID == 10)
+
+            {
+
+                //the central body is the sun, so the vector to the sun is just the negative of the target body's position vector
+
+                vector_to_sun = -this->state_before_event.getSubMatrix1D(0, 2);
+
+                velocity_relative_to_sun = this->state_before_event.getSubMatrix1D(3, 5);
+
+            }
+
+            else
+
+            {
+
+                //the central body is not the sun, so we need to locate the central body relative to the sun and then add it to the target body's position vector
+
+                //and then negate the whole thing
+
+                doubleType central_body_state[12];
+
+                this->myUniverse->locate_central_body(this->state_before_event(7),
+
+                    central_body_state,
+
+                    *this->myOptions,
+
+                    false);
+
+
+
+                for (size_t stateIndex : {0, 1, 2})
+
+                {
+
+                    vector_to_sun(stateIndex) = -(central_body_state[stateIndex] + this->state_before_event(stateIndex));
+
+                    velocity_relative_to_sun(stateIndex) = central_body_state[stateIndex + 3] + this->state_before_event(stateIndex + 3);
+
+                }
+
+            }
+
+
+
+            
+
+            //mimic what we did in Phase B, for testing
+
+            //compute the basis vectors of the target frame
+
+            Astrodynamics::frame EclipticFrame;
+
+            EclipticFrame.initialize_ecliptic();
+
+            math::Matrix<doubleType> Vinf_ecliptic = EclipticFrame.get_R_from_ICRF_to_J2000BCI() * this->Vinfinity_in;
+
+            math::Matrix<doubleType> RtoSun_ecliptic = EclipticFrame.get_R_from_ICRF_to_J2000BCI() * vector_to_sun;
+
+            math::Matrix<doubleType> Xhat = Vinf_ecliptic.unitize();
+
+            math::Matrix<doubleType> Yhat = RtoSun_ecliptic.unitcross(Xhat);
+
+            math::Matrix<doubleType> Zhat = Xhat.unitcross(Yhat);
+
+
+
+            math::Matrix<doubleType> R_from_Ecliptic_to_Target = Xhat.horz_cat(Yhat.horz_cat(Zhat));
+
+
+
+            math::Matrix<doubleType> R_from_Target_to_Ecliptic = R_from_Ecliptic_to_Target.transpose();
+
+
+
+            math::Matrix<doubleType> rp_ecliptic = R_from_Target_to_Ecliptic * math::Matrix<doubleType>(3, 1, std::vector<doubleType>({ 0.0, 0.0, this->myJourneyOptions->zero_turn_flyby_distance }));
+
+
+
+            math::Matrix<doubleType> rp_ICRF = EclipticFrame.get_R_from_J2000BCI_to_ICRF() * rp_ecliptic;
+
+
+
+            //********************************************now the real way
+
+
+
             //compute the target-centered angular momentum unit vector - the cross of the vector to the sun line with the v-infinity
             math::Matrix<doubleType> h_hat = (vector_to_sun).unitcross(this->Vinfinity_in);
 
@@ -287,33 +349,55 @@ namespace EMTG
             math::Matrix<doubleType> Spacecraft_Position_ICRF = v_hat.unitcross(h_hat) * this->myJourneyOptions->zero_turn_flyby_distance;
 
             return Spacecraft_Position_ICRF.vert_cat(this->Vinfinity_in);
-        }//end get_periapse_state()
-
-        //output
+        }//end get_periapse_state()
+
+
+
+        //output
+
         void EphemerisPeggedZeroTurnFlyby::output_maneuver_and_target_spec(std::ofstream& maneuver_spec_file, std::ofstream& target_spec_file, bool& haveManeuverNeedTarget)
         {
             //We will proceed using the same assumptions as in the Lucy mission - that a zero-turn flyby always occurs along the Sun-body line
             //Jacob thinks this is a good place to start for most missions, and hey, that's how Lucy works and they're paying for this.
-
-            if (haveManeuverNeedTarget)
-            {
-                //reset the flag that tells us we need a target spec line
-                haveManeuverNeedTarget = false;
 
-                //Step 1.1: initialize a target spec object
-                math::Matrix<doubleType> periapse_state = this->get_periapse_state().vert_cat(math::Matrix<doubleType>(1, 1, this->state_before_event(6)));
-
-                this->myBplane.define_bplane_without_bend_angle(periapse_state, this->Vinfinity_in);
-                this->myBplane.define_bplane(periapse_state);
-                target_spec_line myTargetSpecLine(this->name,
-                    "EME2000",
-                    this->myBody->name,
-                    this->state_before_event(7),
-                    periapse_state,
-                    this->myBplane.getBdotR(),
-                    this->myBplane.getBdotT());
-
-                //Step 1.2: write target spec object
+
+            if (haveManeuverNeedTarget)
+
+            {
+
+                //reset the flag that tells us we need a target spec line
+
+                haveManeuverNeedTarget = false;
+
+
+                //Step 1.1: initialize a target spec object
+
+                math::Matrix<doubleType> periapse_state = this->get_periapse_state().vert_cat(math::Matrix<doubleType>(1, 1, this->state_before_event(6)));
+
+
+
+                this->myBplane.define_bplane_without_bend_angle(periapse_state, this->Vinfinity_in);
+
+                this->myBplane.define_bplane(periapse_state);
+
+                target_spec_line myTargetSpecLine(this->name,
+
+                    "EME2000",
+
+                    this->myBody->name,
+
+                    this->state_before_event(7),
+
+                    periapse_state,
+
+                    this->myBplane.getBdotR(),
+
+                    this->myBplane.getBdotT());
+
+
+
+                //Step 1.2: write target spec object
+
                 myTargetSpecLine.write(target_spec_file);
             }
         }//end output_maneuver_and_target_spec()

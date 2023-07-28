@@ -6,6 +6,9 @@
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 // Licensed under the NASA Open Source License (the "License"); 
 // You may not use this file except in compliance with the License. 
 // You may obtain a copy of the License at:
@@ -16,6 +19,7 @@
 // express or implied.   See the License for the specific language
 // governing permissions and limitations under the License.
 
+#ifndef NOSNOPT
 //header file for SNOPT interface
 #pragma once
 
@@ -34,7 +38,11 @@ namespace EMTG
             SNOPT_interface() : NLP_interface::NLP_interface() {};
             SNOPT_interface(problem* myProblem,
                 const NLPoptions& myOptions);
-
+			
+				
+			virtual void initialize(problem* myProblem,
+                const NLPoptions& myOptions);
+					
             //run NLP
             virtual void run_NLP(const bool& X0_is_scaled = true);
 #ifdef SNOPT72
@@ -89,3 +97,4 @@ namespace EMTG
         
     }//end namespace Solvers
 }//end namespace EMTG
+#endif //NOSNOPT

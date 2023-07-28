@@ -17,7 +17,7 @@ class MissionOptions(object):
         self.DLA_bounds = [-90.0, 90.0] #DLA in degrees
         self.RLA_bounds = [-2880.0, 2880.0] #RLA in degrees
         self.mission_type = 2 #mission type, #0: MGALTS, #1: FBLTS, #2: MGALT, #3: FBLT, #4: PSBI, #5: PSFB, #6: MGAnDSMs, #7: CoastPhase, #8: SundmanCoastPhase, #9: variable phase type, #10: ProbeEntryPhase, #11 ControlLawThrustPhase
-        self.NLP_solver_type = 0 #NLP solver type,#0: SNOPT,#1: WORHP
+        self.NLP_solver_type = 0 #NLP solver type,#0: SNOPT,#1: WORHP,#2: IPOPT-MA27, #3: IPOPT-MUMPS
         self.NLP_solver_mode = 1 #NLP solver mode,#0: find feasible point only,#1: find optimal solution,#2: satisfy equality constraints
         self.quiet_NLP = 1 #Quiet NLP solver?
         self.ACE_feasible_point_finder = 0 #Enable ACE feasible point finder?
@@ -784,7 +784,7 @@ class MissionOptions(object):
                 optionsFile.write("mission_type " + str(self.mission_type) + "\n")
     
             if (self.NLP_solver_type != 0 or writeAll):
-                optionsFile.write("#NLP solver type\n#0: SNOPT\n#1: WORHP\n")
+                optionsFile.write("#NLP solver type\n#0: SNOPT\n#1: WORHP\n#2: IPOPT-MA27\n#3: IPOPT-MUMPS\n")
                 optionsFile.write("NLP_solver_type " + str(self.NLP_solver_type) + "\n")
     
             if (self.NLP_solver_mode != 1 or writeAll):

@@ -1,3 +1,6 @@
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 //SplineEphem Universe container
 //all this does is hold all of your bodies
 //Jacob Englander 11-8-2016

@@ -7,6 +7,9 @@
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 
+// Copyright (c) 2023 The Regents of the University of Colorado.
+// All Other Rights Reserved.
+
 // Licensed under the NASA Open Source License (the "License"); 
 // You may not use this file except in compliance with the License. 
 // You may obtain a copy of the License at:
@@ -79,19 +82,32 @@ namespace EMTG
             this->process_event_right_side(X, Xindex, F, Findex, G, needG);
 
             this->BoundaryEventBase::process_specialized_constraints(X, Xindex, F, Findex, G, needG);
-        }//end process_event
-
-        void FreePointLTRendezvous::process_event_right_side(const std::vector<doubleType>& X,
-            size_t& Xindex,
-            std::vector<doubleType>& F,
-            size_t& Findex,
-            std::vector<double>& G,
-            const bool& needG)
-        {
-            //base class
-            this->FreePointArrival::process_event_right_side(X, Xindex, F, Findex, G, needG);
-
-            std::get<2>(this->Derivatives_of_StateAfterEvent[this->dIndex_mass_wrt_encodedMass]) = this->ETM(6, 6);
+        }//end process_event
+
+
+
+        void FreePointLTRendezvous::process_event_right_side(const std::vector<doubleType>& X,
+
+            size_t& Xindex,
+
+            std::vector<doubleType>& F,
+
+            size_t& Findex,
+
+            std::vector<double>& G,
+
+            const bool& needG)
+
+        {
+
+            //base class
+
+            this->FreePointArrival::process_event_right_side(X, Xindex, F, Findex, G, needG);
+
+
+
+            std::get<2>(this->Derivatives_of_StateAfterEvent[this->dIndex_mass_wrt_encodedMass]) = this->ETM(6, 6);
+
         }//end process_event_right_side()
 
         //******************************************output methods
@@ -120,15 +136,20 @@ namespace EMTG
                 this->myUniverse->locate_central_body(this->state_after_event(7),
                     central_body_state_and_derivatives,
                     *this->myOptions,
-                    false);                
-                math::Matrix<doubleType> R_CB_Sun(3, 1, 0.0);
+                    false);                
+
+                math::Matrix<doubleType> R_CB_Sun(3, 1, 0.0);
+
                 for (size_t stateIndex = 0; stateIndex < 3; ++stateIndex)
                 {
                     R_CB_Sun(stateIndex) = central_body_state_and_derivatives[stateIndex];
-                }
+                }
+
                 R_sc_Sun = this->state_after_event.getSubMatrix1D(0, 2) + R_CB_Sun;
-            }
-
+            }
+
+
+
             this->mySpacecraft->computePowerState(R_sc_Sun.getSubMatrix1D(0, 2).norm() / this->myOptions->AU, this->state_after_event(7));
 
             write_output_line(outputfile,
