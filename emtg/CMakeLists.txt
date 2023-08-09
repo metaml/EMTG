@@ -1,3 +1,5 @@
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 cmake_minimum_required(VERSION 3.8)
 
 #pull in the user-defined configurations
@@ -32,22 +34,23 @@ add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING)
 
 # specify where the executable will be installed
 if(MSVC)
-	STRING(REGEX REPLACE "/" "\\\\" OUTPUTDESTINATION "${PROJECT_SOURCE_DIR}\\bin")
+    STRING(REGEX REPLACE "/" "\\\\" OUTPUTDESTINATION "${PROJECT_SOURCE_DIR}\\bin")
 else(MSVC)
-	set(OUTPUTDESTINATION ${PROJECT_SOURCE_DIR}/bin)
+    set(OUTPUTDESTINATION ${PROJECT_SOURCE_DIR}/bin)
 endif(MSVC)
 if(NOT IS_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
-	file(MAKE_DIRECTORY ${OUTPUTDESTINATION})
+    file(MAKE_DIRECTORY ${OUTPUTDESTINATION})
 endif(NOT IS_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 
 #compiler-time Define-level options  for EMTG
-option(QUIET_SNOPT "Makes SNOPT not print things." OFF)
-option(SAFE_SNOPT "Trap things that could blow up SNOPT" ON)
-option(SNOPT72 "Set SNOPT 7.2" OFF)
-option(SNOPT75 "Use SNOPT 7.5" OFF)
-option(SNOPT76 "Use SNOPT 7.6" ON)
-option(SNOPT_MINGW_DLL "Use SNOPT built with MINGW in Windows" ON)
+option(NOSNOPT "Exclude SNOPT" TRUE)
+option(QUIET_SNOPT "Makes SNOPT not print things." FALSE)
+option(SAFE_SNOPT "Trap things that could blow up SNOPT" FALSE)
+option(SNOPT72 "Set SNOPT 7.2" FALSE)
+option(SNOPT75 "Use SNOPT 7.5" FALSE)
+option(SNOPT76 "Use SNOPT 7.6" FALSE)
+option(SNOPT_MINGW_DLL "Use SNOPT built with MINGW in Windows" FALSE)
 option(DEBUG_CHECK_VARIABLES_AND_CONSTRAINTS_IN_USER_FUNCTION "Check decision and objective/constraint vectors for NaN and inf" OFF)
 option(FAST_EMTG_MATRIX "Enable fast EMTG matrix class (removes bounds checking)" ON)
 option(SPLINE_EPHEM "Enable SplineEphem" ON)
@@ -78,30 +81,34 @@ if(CMAKE_BUILD_TYPE MATCHES Release)
     elseif (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
         set(CMAKE_CXX_FLAGS_RELEASE " -g -O2")
     endif()
-	message(STATUS "The following compiler optimization flags have been set: " ${CMAKE_CXX_FLAGS_RELEASE} "\n")
+    message(STATUS "The following compiler optimization flags have been set: " ${CMAKE_CXX_FLAGS_RELEASE} "\n")
 elseif(CMAKE_BUILD_TYPE MATCHES Debug)
-	message(STATUS "The following compiler optimization flags have been set: " ${CMAKE_CXX_FLAGS_DEBUG} "\n")
+  message(STATUS "The following compiler optimization flags have been set: " ${CMAKE_CXX_FLAGS_DEBUG} "\n")
 endif()
 
 if(QUIET_SNOPT)
-	add_definitions(-DQUIET_SNOPT)
+  add_definitions(-DQUIET_SNOPT)
 endif(QUIET_SNOPT)
 
 if(BACKGROUND_MODE)
     message(STATUS "Background mode activated")
-	add_definitions(-DBACKGROUND_MODE)
+    add_definitions(-DBACKGROUND_MODE)
 endif(BACKGROUND_MODE)
 
 if(SAFE_SNOPT)
-	add_definitions(-DSAFE_SNOPT)
+    add_definitions(-DSAFE_SNOPT)
 endif(SAFE_SNOPT)
 
 if(DEBUG_CHECK_VARIABLES_AND_CONSTRAINTS_IN_USER_FUNCTION)
-	add_definitions(-DDEBUG_CHECK_VARIABLES_AND_CONSTRAINTS_IN_USER_FUNCTION)
+    add_definitions(-DDEBUG_CHECK_VARIABLES_AND_CONSTRAINTS_IN_USER_FUNCTION)
 endif(DEBUG_CHECK_VARIABLES_AND_CONSTRAINTS_IN_USER_FUNCTION)
 
+if(NOSNOPT)
+  add_definitions(-DNOSNOPT)
+endif(NOSNOPT)
+
 if(SNOPT75)
-    add_definitions(-DSNOPT75)
+  add_definitions(-DSNOPT75)
 endif(SNOPT75)
 
 if(SNOPT76)
@@ -123,54 +130,54 @@ endif(HAS_BUILT_IN_THRUSTERS)
 
 if(SPLINE_EPHEM)
     add_definitions(-DSPLINE_EPHEM)
-	
-	# GNU Scientific Library
-    set(GSL_INCLUDE_DIRS ${GSL_PATH})    
+
+    # GNU Scientific Library
+    set(GSL_INCLUDE_DIRS ${GSL_PATH})
     include_directories(${GSL_INCLUDE_DIRS})
-    
-	add_library(gsl STATIC IMPORTED)
-	add_library(gslcblas STATIC IMPORTED)
+
+    add_library(gsl STATIC IMPORTED)
+    add_library(gslcblas STATIC IMPORTED)
     if(MSVC)
-		set_property(TARGET gsl PROPERTY IMPORTED_LOCATION ${GSL_PATH}/${CMAKE_CFG_INTDIR}/gsl.lib)
-		set_property(TARGET gslcblas PROPERTY IMPORTED_LOCATION ${GSL_PATH}/${CMAKE_CFG_INTDIR}/gslcblas.lib)        
+        set_property(TARGET gsl PROPERTY IMPORTED_LOCATION ${GSL_PATH}/${CMAKE_CFG_INTDIR}/gsl.lib)
+        set_property(TARGET gslcblas PROPERTY IMPORTED_LOCATION ${GSL_PATH}/${CMAKE_CFG_INTDIR}/gslcblas.lib)
     else()
-        set_property(TARGET gsl PROPERTY IMPORTED_LOCATION ${GSL_PATH}/${CMAKE_CFG_INTDIR}/libgsl.a)
-		set_property(TARGET gslcblas PROPERTY IMPORTED_LOCATION ${GSL_PATH}/${CMAKE_CFG_INTDIR}/libgslcblas.a)
+        set_property(TARGET gsl PROPERTY IMPORTED_LOCATION ${GSL_PATH}/${CMAKE_CFG_INTDIR}/libgsl.la)
+        set_property(TARGET gslcblas PROPERTY IMPORTED_LOCATION ${GSL_PATH}/${CMAKE_CFG_INTDIR}/libgslcblas.la)
     endif()
 
-	set(GSL_LIBRARIES gsl gslcblas)
-	set(EMTG_LIBRARIES ${EMTG_LIBRARIES} ${GSL_LIBRARIES})
+    set(GSL_LIBRARIES gsl gslcblas)
+    set(EMTG_LIBRARIES ${EMTG_LIBRARIES} -lgsl -lgslcblas)
 endif(SPLINE_EPHEM)
 
 #----------------CSpice Work------------------------------------------------------
 message(STATUS "Now checking for CSpice...")
 if (MSVC) # aka 'windows'
-	set(CSPICE_FILE_TO_BE_CORRECTED "${CSPICE_DIR}/src/cspice/mkprodct.bat")
-	set(CSPICE_MAKEFILE "makeall.bat")
+    set(CSPICE_FILE_TO_BE_CORRECTED "${CSPICE_DIR}/src/cspice/mkprodct.bat")
+    set(CSPICE_MAKEFILE "makeall.bat")
 else (MSVC) #aka Linux or Mac, as both of those use the mkprodct.csh system
-	set(CSPICE_FILE_TO_BE_CORRECTED "${CSPICE_DIR}/src/cspice/mkprodct.csh")
-	set(CSPICE_MAKEFILE "makeall.csh")
+    set(CSPICE_FILE_TO_BE_CORRECTED "${CSPICE_DIR}/src/cspice/mkprodct.csh")
+    set(CSPICE_MAKEFILE "makeall.csh")
 endif(MSVC)
 
 
 if (EXISTS "${CSPICE_DIR}/${CSPICE_MAKEFILE}")
-	message(STATUS "Cspice located and unzipped correctly.")
+    message(STATUS "Cspice located and unzipped correctly.")
 else()
-	message(FATAL_ERROR "CSPICE is not unzipped into the emtg/cspice folder correctly.")
+    message(FATAL_ERROR "CSPICE is not unzipped into the emtg/cspice folder correctly.")
 endif()
 
 if (NOT MSVC) #cspice doesn't label the file correctly when it is done; easier to just rename it
-	if (NOT EXISTS "${CSPICE_DIR}/lib/libcspice.a")
-		message(STATUS "Renaming cspice.a to libcspice.a")
-		file(RENAME "${CSPICE_DIR}/lib/cspice.a" "${CSPICE_DIR}/lib/libcspice.a")
-		if (NOT EXISTS "${CSPICE_DIR}/lib/libcspice.a")
-			message(FATAL_ERROR "CSpice not built properly for a Unix System.")
-		endif()
-	endif()
+    if (NOT EXISTS "${CSPICE_DIR}/lib/libcspice.a")
+        message(STATUS "Renaming cspice.a to libcspice.a")
+        file(RENAME "${CSPICE_DIR}/lib/cspice.a" "${CSPICE_DIR}/lib/libcspice.a")
+        if (NOT EXISTS "${CSPICE_DIR}/lib/libcspice.a")
+            message(FATAL_ERROR "CSpice not built properly for a Unix System.")
+        endif()
+    endif()
 else()
-	if(NOT EXISTS "${CSPICE_DIR}/lib/cspice.lib")	
-		message(FATAL_ERROR "CSpice not built properly for a Windows System.  Please run the cspice/makeall.bat from within the Visual Studio Command Line tools and then reconfigure cmake.")
-	endif()	
+    if(NOT EXISTS "${CSPICE_DIR}/lib/cspice.lib")
+        message(FATAL_ERROR "CSpice not built properly for a Windows System.  Please run the cspice/makeall.bat from within the Visual Studio Command Line tools and then reconfigure cmake.")
+    endif()
 endif()
 
 set(CSPICE_LIBRARY cspice)
@@ -183,22 +190,22 @@ message(STATUS "Now checking on SNOPT...")
 
 #assume newest version of SNOPT
 if (IS_DIRECTORY ${SNOPT_ROOT_DIR}/interfaces)
-	include_directories("${SNOPT_ROOT_DIR}/interfaces/include")
-	
+        include_directories("${SNOPT_ROOT_DIR}/interfaces/include")
+
 	set(SNOPT_INTERFACE_HEADERS ${SNOPT_ROOT_DIR}/interfaces/include/snoptProblem.hpp ${SNOPT_ROOT_DIR}/interfaces/include/snopt.h)
 	set(SNOPT_INTERFACE_SOURCE ${SNOPT_ROOT_DIR}/interfaces/src/snoptProblem.cpp)
-    
+
     if (MSVC AND SNOPT_MINGW_DLL)
-    
+
         set(SNOPT_LIBRARIES ${SNOPT_ROOT_DIR}/build/${CMAKE_CFG_INTDIR}/libsnopt.lib)
-        
+
         add_library(snopt_interface STATIC IMPORTED)
         set_property(TARGET snopt_interface PROPERTY IMPORTED_LOCATION "${SNOPT_ROOT_DIR}/build/${CMAKE_CFG_INTDIR}/snopt_interface.lib")
         link_directories(${SNOPT_ROOT_DIR}/build/${CMAKE_CFG_INTDIR})
         set(SNOPT_LIBRARIES ${SNOPT_LIBRARIES} snopt_interface)
-    
+
     else()
-	
+
         #PULL IN SNOPT.  THIS ASSUMES SNOPT HAS ALREADY BEEN COMPILED AND IS IN A VERY SPECIFIC SPOT.
         if (NOT MSVC)
             add_library(snopt SHARED IMPORTED)
@@ -210,9 +217,9 @@ if (IS_DIRECTORY ${SNOPT_ROOT_DIR}/interfaces)
             set_property(TARGET snopt PROPERTY IMPORTED_LOCATION "${SNOPT_ROOT_DIR}/lib/snopt.lib")
             set(EMTG_LIBRARIES ${EMTG_LIBRARIES} ifmodintr.lib)
             link_directories("${INTEL_FORTRAN_DIR}")
-            
+
         endif(NOT MSVC)
-        
+
 
         if (MSVC)
             link_directories("${PROJECT_SOURCE_DIR}/lib")
@@ -228,12 +235,12 @@ if (IS_DIRECTORY ${SNOPT_ROOT_DIR}/interfaces)
             target_link_libraries(snopt_interface gfortran)
             set(SNOPT_LIBRARIES snopt_interface snopt_cpp snopt)
         endif()
-        
+
         set_property(TARGET snopt_interface PROPERTY POSITION_INDEPENDENT_CODE ON)
-        
+
     endif()
 
-	
+
 #okay, do we have an older version of SNOPT?
 
 elseif(IS_DIRECTORY ${SNOPT_ROOT_DIR}/cppsrc)
@@ -241,13 +248,13 @@ elseif(IS_DIRECTORY ${SNOPT_ROOT_DIR}/cppsrc)
 	include_directories("${SNOPT_ROOT_DIR}/win32")
 	set(SNOPT_INTERFACE_HEADERS ${SNOPT_ROOT_DIR}/win32/f2c.h ${SNOPT_ROOT_DIR}/cppsrc/snoptProblem.hh ${SNOPT_ROOT_DIR}/cppsrc/snopt.hh ${SNOPT_ROOT_DIR}/cppsrc/snfilewrapper.hh)
 	set(SNOPT_INTERFACE_SOURCE ${SNOPT_ROOT_DIR}/cppsrc/snfilewrapper.c ${SNOPT_ROOT_DIR}/cppsrc/snoptProblem.cc)
-	
+
 	#PULL IN SNOPT.  THIS ASSUMES SNOPT HAS ALREADY BEEN COMPILED AND IS IN A VERY SPECIFIC SPOT.
 	add_library(f2c STATIC IMPORTED)
 	add_library(snopt_cpp STATIC IMPORTED)
 	add_library(snopt_c STATIC IMPORTED)
 	add_library(snoptsnprint STATIC IMPORTED)
-	
+
 	if (NOT MSVC)
 		set_property(TARGET f2c PROPERTY IMPORTED_LOCATION "${SNOPT_ROOT_DIR}/lib/libf2c.a")
 		set_property(TARGET snopt_cpp PROPERTY IMPORTED_LOCATION "${SNOPT_ROOT_DIR}/lib/libsnopt_cpp.a")
@@ -259,24 +266,27 @@ elseif(IS_DIRECTORY ${SNOPT_ROOT_DIR}/cppsrc)
 		set_property(TARGET snopt_c PROPERTY IMPORTED_LOCATION "${SNOPT_ROOT_DIR}/win32/snopt_csrc/Release/snopt.lib")
 		set(SNOPT_LIBRARIES snopt_c f2c)
 	endif(NOT MSVC)
-	
+
 	link_directories("${PROJECT_SOURCE_DIR}/lib")
-	
+
 	add_definitions(-DSNOPT72 "Use SNOPT 7.2-12 or older" ON)
 
 else(IS_DIRECTORY ${SNOPT_ROOT_DIR}/interfaces)
-	message(FATAL_ERROR "Could not find snopt")
+# message(FATAL_ERROR "Could not find snopt")
 endif(IS_DIRECTORY ${SNOPT_ROOT_DIR}/interfaces)
 
 include_directories(${SNOPT_INCLUDE_DIR})
 
-set(EMTG_LIBRARIES ${EMTG_LIBRARIES} ${SNOPT_LIBRARIES})
-
+if(NOSNOPT)
+  Set(EMTG_LIBRARIES ${EMTG_LIBRARIES} -lipopt -lipoptamplinterface)
+else()
+  Set(EMTG_LIBRARIES ${EMTG_LIBRARIES} ${SNOPT_LIBRARIES})
+endif(NOSNOPT)
 #-------------------------Boost related work------------------------------
 message(STATUS "Now looking for BOOST..")
 include(FindBoost)
 if(MSVC)
-	Set(Boost_NAMESPACE libboost)
+    Set(Boost_NAMESPACE libboost)
 endif(MSVC)
 
 find_package(Boost 1.60 COMPONENTS filesystem system serialization REQUIRED)
@@ -288,5 +298,3 @@ set(EMTG_LIBRARIES ${EMTG_LIBRARIES} ${Boost_LIBRARIES})
 
 #pull in EMTG itself
 add_subdirectory(src)
-
-

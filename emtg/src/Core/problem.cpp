@@ -9,13 +9,13 @@
 // Copyright (c) 2023 The Regents of the University of Colorado.
 // All Other Rights Reserved.
 
-// Licensed under the NASA Open Source License (the "License"); 
-// You may not use this file except in compliance with the License. 
+// Licensed under the NASA Open Source License (the "License");
+// You may not use this file except in compliance with the License.
 // You may obtain a copy of the License at:
 // https://opensource.org/licenses/NASA-1.3
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
 // express or implied.   See the License for the specific language
 // governing permissions and limitations under the License.
 
@@ -71,7 +71,7 @@ namespace EMTG
         this->evaluate(X, this->F, this->G, false);
     }
 
-    bool problem::optimize() 
+    bool problem::optimize()
     {
         bool successfully_optimized = false;
 
@@ -112,7 +112,7 @@ namespace EMTG
                     std::cout << error.what() << std::endl;
                     std::cout << "Failure to evaluate " << this->options.mission_name << std::endl;
                 }
-				
+
                 this->X = this->Xopt;
 
                 if (successfully_optimized)
@@ -168,10 +168,10 @@ namespace EMTG
             case InnerLoopSolverType::MBH: //run MBH
             {
                 Solvers::NLPoptions myNLPoptions(this->options);
-				
+
 				Solvers::NLP_interface *myNLP;
 				EMTG::Solvers::MBH solver;
-					
+
 		        if (this->options.NLP_solver_type == 1)
 		        {
 		            std::cout << "WORHP interface is deprecated" << std::endl;
@@ -221,7 +221,7 @@ namespace EMTG
                     this->Xopt = solver.getX_most_feasible(); //we store the unscaled Xcurrent
 
                     options.outputfile = options.working_directory + "//FAILURE_" + options.mission_name + ".emtg";
-                }                
+                }
 
                 try
                 {
@@ -277,9 +277,9 @@ namespace EMTG
                 }
 
                 Solvers::NLPoptions myNLPoptions(this->options);
-				
+
 				Solvers::NLP_interface *myNLP;
-					
+
 		        if (this->options.NLP_solver_type == 1)
 		        {
 		            std::cout << "WORHP interface is deprecated" << std::endl;
@@ -308,9 +308,9 @@ namespace EMTG
 				}
 
                 myNLP->initialize(this, myNLPoptions);
-				
+
                 myNLP->setX0_unscaled(this->options.current_trialX);
-                
+
 				try
 				{
 					this->evaluate(this->options.current_trialX, this->F, this->G, true);
@@ -597,7 +597,7 @@ namespace EMTG
 
         //we're not actually going to normalize
         normalized_max_constraint_violation = fabs(max_constraint_violation);
-        
+
         distance_from_equality_filament = sqrt(distance_from_equality_filament);
     }
 
@@ -692,7 +692,7 @@ namespace EMTG
             dumpfile << std::endl;
             for (size_t Xentry = 0; Xentry < this->Xdescriptions.size(); ++Xentry)
             {
-                
+
                 if (this->Xdescriptions[Xentry].find("epoch") < 1024 || this->Xdescriptions[Xentry].find("time") < 1024)
                 {
                     dumpfile << "X[" << Xentry << "] (" << this->Xdescriptions[Xentry] << ") = " << X[Xentry] _GETVALUE / 86400.0 << std::endl;
@@ -833,7 +833,7 @@ namespace EMTG
     {
         std::string path = options.working_directory + "//";
 
-        std::string base_name; 
+        std::string base_name;
         if (this->options.override_default_output_file_name)
         {
             base_name = this->options.forced_output_file_name;
@@ -867,4 +867,3 @@ namespace EMTG
         }
     }//end what_the_heck_am_I_called()
 } /* namespace EMTG */
-

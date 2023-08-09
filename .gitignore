@@ -1,7 +1,9 @@
 build/
+cspice.tar.Z
 emtg/PyEMTG/PyEMTG.pyw - Shortcut.lnk
-OpenSourceData/universe/ephemeris_files/de430.bsp
+emtg/src/math/randutils.hpp
+Ipopt
 OpenSourceData/universe/ephemeris_files/PlanetsLight.bsp
+OpenSourceData/universe/ephemeris_files/de430.bsp
 scripts/*
 testatron/*
-emtg/src/math/randutils.hpp
