@@ -24,6 +24,7 @@ cspice: ## copy NASA's SPICE into ./cspice
 
 ipopt: ## copy lpopt source int ./Ipopt
 	git clone https://github.com/coin-or/Ipopt.git
+	cd Ipopt && rm -rf .git
 	cd Ipopt && ./configure && make
 
 clean: ## clean
