@@ -1,17 +1,16 @@
+#!/usr/bin/env tcsh
 #! /bin/csh
 #
-#   Mac OS X clang version. cook_c version.
+#   PC-LINUX 64bit version.
 #
-#   This script is a more or less generic library/executable
-#   builder for CSPICE products.  It assumes that it is executed
-#   from one of the "product" directories in a tree that looks like
-#   the one displayed below:
+#   This script  assumes that it is executed from one of the "product" 
+#   directories in a tree that looks like the one displayed below:
 #
 #                      package
 #                         |
 #                         |
 #       +------+------+------+------+------+
-#       |      |      |      |      |      |
+#       |      |      |      |      |      | 
 #     data    doc    etc    exe    lib    src
 #                                          |
 #                                          |
@@ -28,20 +27,20 @@
 #         of the library is the same as the name of the product.
 #         The library is placed in the "lib" directory in the tree
 #         above.  The script is then done.
-#
+# 
 #         If there are .pgm files and there were some .c
 #         files compiled the objects are gathered together in the
 #         current directory into a library called locallib.a.
 #
-#     3)  If any *.pgm files exist in the current directory, compile
+#     3)  If any *.pgm files exist in the current directory, compile 
 #         them and add their objects to locallib.a.  Create a C main
 #         program file from the uniform CSPICE main program main.x.
 #         Compile this main program and link its object with locallib.a,
-#         ../../cspice.a and ../../csupport.a. The output
+#         ../../cspice.a and ../../csupport.a. The output 
 #         executables have an empty extension.  The executables are
 #         placed in the "exe" directory in the tree above.
-#
-#   The environment variable TKCOMPILEOPTIONS containing compile options
+#         
+#   The environment variable TKCOMPILEOPTIONS containing compile options 
 #   is optionally set. If it is set prior to executing this script,
 #   those options are used. It it is not set, it is set within this
 #   script as a local variable.
@@ -49,9 +48,9 @@
 #   References:
 #   ===========
 #
-#   "Unix Power Tools", page 11.02
+#   "Unix Power Tools", page 11.02 
 #      Use the "\" character to unalias a command temporarily.
-#
+#        
 #   "A Practical Guide to the Unix System"
 #
 #   "The Unix C Shell Field Guide"
@@ -59,84 +58,68 @@
 #   Change History:
 #   ===============
 #
-#   Version 1.4.0  Nov. 29, 2021  Boris Semenov
+#   Version 6.1.0  November 13, 2006  Boris Semenov
 #
-#      Changed compiler from cc to clang.
+#      Updated for 64bit. Put -O2 back in.
 #
-#   Version 1.3.0  Sep. 12, 2021  Boris Semenov
-#
-#      Added warning suppression options.
-#
-#   Version 1.1.1  Jul. 30, 2002  Boris Semenov 
-#
-#      Misc. cleanup: moved "rm locallib.a" to the end of the script, 
-#      eliminated duplicate "echo"s, etc. etc.
-#
-#   Version 1.1.0  Jan. 18, 2002  Ed Wright
-#
-#      Updated GCC version for Mac OS X CC.
-#
-#   Version 1.0.0  Feb. 26, 1999  Nat Bachman
+#   Version 1.0.0  Sep. 21, 1999  Nat Bachman
 #
 #
+
 
 #
 #  Choose your compiler.
 #
 if ( $?TKCOMPILER ) then
 
-    echo " "
-    echo "      Using compiler: "
-    echo "      $TKCOMPILER"
+   echo " "
+   echo "      Using compiler: "
+   echo "      $TKCOMPILER"
 
 else
 
-    set TKCOMPILER  =  "clang"
-    echo " "
-    echo "      Setting default compiler:"
-    echo $TKCOMPILER
-
+   set TKCOMPILER  =  "gcc"
+   echo " "
+   echo "      Setting default compiler:"
+   echo $TKCOMPILER
+   
 endif
 
 
 #
-#  What compile options do we want to use? If they were
+#  What compile options do we want to use? If they were 
 #  set somewhere else, use those values.  The same goes
 #  for link options.
 #
 if ( $?TKCOMPILEOPTIONS ) then
-    echo " "
-    echo "      Using compile options: "
-    echo "      $TKCOMPILEOPTIONS"
+   echo " "
+   echo "      Using compile options: "
+   echo "      $TKCOMPILEOPTIONS"
 else
 #
 #  Options:
 #
-#     -O2                optimize
+#     -ansi              Compile source as ANSI C
 #
-#     -DNON_UNIX_STDIO   Don't assume standard Unix stdio.h
+#     -DNON_UNIX_STDIO   Don't assume standard Unix stdio.h 
 #                        implementation
 #
 #
-    set OPT1             = "-DNON_UNIX_STDIO"
-    set OPT2             = "-Wno-shift-op-parentheses"
-    set OPT3             = "-Wno-logical-op-parentheses"
-    set OPT4             = "-Wno-parentheses"
-    set TKCOMPILEOPTIONS = "-m64 -c -ansi -O2 $OPT1 $OPT2 $OPT3 $OPT4"
-    echo " "
-    echo "      Setting default compile options:"
-    echo "      $TKCOMPILEOPTIONS"
+   set TKCOMPILEOPTIONS = "-c -ansi -m64 -O2 -DNON_UNIX_STDIO"
+   echo " "
+   echo "      Setting default compile options:"
+   echo "      $TKCOMPILEOPTIONS"
 endif
 
 if ( $?TKLINKOPTIONS ) then
-    echo " "
-    echo "      Using link options: "
-    echo "      $TKLINKOPTIONS"
+   echo " "
+   echo "      Using link options: "
+   echo "      $TKLINKOPTIONS"
 else
-    set TKLINKOPTIONS = "-m64 -lm"
-    echo " "
-    echo "      Setting default link options:"
-    echo "      $TKLINKOPTIONS"
+   set TKLINKOPTIONS = "-lm -m64"
+   echo " "
+   echo "      Setting default link options:"
+   echo "      $TKLINKOPTIONS"
 endif
 
 echo " "
@@ -144,9 +127,9 @@ echo " "
 #
 #   Determine a provisional LIBRARY name.
 #
-foreach item ( `pwd` )
-    set LIBRARY = "../../lib/"$item:t
-end
+   foreach item ( `pwd` )
+      set LIBRARY = "../../lib/"$item:t
+   end
 
 #
 #  Are there any *.c files that need to be compiled?
@@ -155,12 +138,13 @@ end
 
 if ( $status == 0 ) then
 
-    foreach SRCFILE ( *.c )
-       echo "      Compiling: "   $SRCFILE
-       $TKCOMPILER $TKCOMPILEOPTIONS $SRCFILE
-    end
+   foreach SRCFILE ( *.c )
+      echo "      Compiling: "   $SRCFILE
+      $TKCOMPILER $TKCOMPILEOPTIONS $SRCFILE
+   end
 
 endif
+
 
 echo " "
 
@@ -171,18 +155,18 @@ echo " "
 \ls *.pgm >& /dev/null
 
 if ( $status == 0 ) then
-    set LIBRARY = "locallib"
+   set LIBRARY = "locallib"
 endif
 
 \ls *.o >& /dev/null
 
 if ( $status == 0 ) then
 
-    echo "      Inserting objects in the library $LIBRARY ..."
-    ar  crv $LIBRARY.a *.o
-    ranlib  $LIBRARY.a
-    \rm                *.o
-    echo " "
+   echo "      Inserting objects in the library $LIBRARY ..."
+   ar  crv $LIBRARY.a *.o
+   ranlib  $LIBRARY.a
+   \rm                *.o    
+   echo " "
 
 endif
 
@@ -196,45 +180,47 @@ endif
 
 if ( $status == 0 ) then
 
-    echo " "
+   echo " "
 
-    foreach MAIN ( *.pgm )
+   foreach MAIN ( *.pgm )
+   
+      set STEM    = $MAIN:r
+      set TARGET  = $STEM.c
+      set MAINOBJ = $STEM.o
+      set EXECUT = ../../exe/$STEM
+   
+      cp $MAIN $TARGET
+   
+      echo "      Compiling and linking: " $MAIN
+      
+      if ( -e locallib.a ) then
 
-       set STEM    = $MAIN:r
-       set TARGET  = $STEM.c
-       set MAINOBJ = $STEM.o
-       set EXECUT = ../../exe/$STEM
+         $TKCOMPILER    $TKCOMPILEOPTIONS $TARGET
+         $TKCOMPILER -o $EXECUT           $MAINOBJ             \
+                                          locallib.a           \
+                                          ../../lib/csupport.a \
+                                          ../../lib/cspice.a   \
+                                          $TKLINKOPTIONS    
 
-       \cp $MAIN $TARGET
+         \rm $TARGET
+         \rm $MAINOBJ
+         \rm locallib.a 
 
-       echo "      Compiling and linking: " $MAIN
+      else
 
-       if ( -e locallib.a ) then
+         echo "Compiling and linking: "   $MAIN     
+         $TKCOMPILER    $TKCOMPILEOPTIONS $TARGET
+         $TKCOMPILER -o $EXECUT           $MAINOBJ             \
+                                          ../../lib/csupport.a \
+                                          ../../lib/cspice.a   \
+                                         $TKLINKOPTIONS
+ 
+         \rm $TARGET
+         \rm $MAINOBJ
 
-          $TKCOMPILER    $TKCOMPILEOPTIONS $TARGET
-          $TKCOMPILER -o $EXECUT           $MAINOBJ             \
-                                           locallib.a           \
-                                           ../../lib/csupport.a \
-                                           ../../lib/cspice.a   \
-                                           $TKLINKOPTIONS
+      endif
 
-          \rm $TARGET
-          \rm $MAINOBJ
-
-       else
-
-          $TKCOMPILER    $TKCOMPILEOPTIONS $TARGET
-          $TKCOMPILER -o $EXECUT           $MAINOBJ             \
-                                           ../../lib/csupport.a \
-                                           ../../lib/cspice.a   \
-                                          $TKLINKOPTIONS
-
-          \rm $TARGET
-          \rm $MAINOBJ
-
-       endif
-
-    end
+   end
 
 endif
 
@@ -247,14 +233,11 @@ echo " "
 \ls *.o >& /dev/null
 
 if ( $status == 0 ) then
-    \rm *.o
+   \rm *.o
 endif
 
-\ls locallib.a* >& /dev/null
-
-if ( $status == 0 ) then
-   \rm locallib.a*
-endif
 
 
 exit 0
+
+   

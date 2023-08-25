@@ -354,9 +354,9 @@ static integer c__6 = 6;
 
 /*        Platform/Environment specific assignments follow. */
 
-	s_copy(attcpy + 32, "M1 MAC", (ftnlen)32, (ftnlen)6);
-	s_copy(attcpy + 64, "MAC OS-X", (ftnlen)32, (ftnlen)8);
-	s_copy(attcpy + 96, "CLANG/64BIT", (ftnlen)32, (ftnlen)11);
+	s_copy(attcpy + 32, "PC", (ftnlen)32, (ftnlen)2);
+	s_copy(attcpy + 64, "LINUX", (ftnlen)32, (ftnlen)5);
+	s_copy(attcpy + 96, "GCC/64BIT", (ftnlen)32, (ftnlen)9);
 	s_copy(attcpy + 128, "LTL-IEEE", (ftnlen)32, (ftnlen)8);
 	s_copy(attcpy + 160, "LF", (ftnlen)32, (ftnlen)2);
 	s_copy(attcpy + 192, "BIG-IEEE LTL-IEEE", (ftnlen)32, (ftnlen)17);
@@ -379,7 +379,7 @@ static integer c__6 = 6;
 
     index = isrchc_(keycpy, &c__6, keyval, (ftnlen)64, (ftnlen)64);
     s_copy(value, attcpy + (((i__1 = index) < 7 && 0 <= i__1 ? i__1 : s_rnge(
-	    "attcpy", i__1, "zzplatfm_", (ftnlen)434)) << 5), value_len, (
+	    "attcpy", i__1, "zzplatfm_", (ftnlen)433)) << 5), value_len, (
 	    ftnlen)32);
     return 0;
 } /* zzplatfm_ */

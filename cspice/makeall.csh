@@ -1,3 +1,4 @@
+#!/usr/bin/env tcsh
 echo This script builds the SPICE delivery
 echo for the cspice package of the toolkit.
 echo

@@ -7,8 +7,8 @@ Introduction
 ===========================================================================
  
    This document describes the structure and contents of the latest version
-   of the NAIF cspice Toolkit for M1 MAC computers using MAC OS-X operating
-   system and CLANG 64BIT compiler.
+   of the NAIF cspice Toolkit for PC computers using LINUX operating system
+   and GCC 64BIT compiler.
  
    Most C compilers come with a large set of compilation options that can
    be used when compiling source code. The compiler options we (NAIF) used
@@ -19,7 +19,7 @@ Introduction
 Version Information
 --------------------------------------------------------
  
-      Creation Date: Sat Jan  1 19:02:15 PST 2022
+      Creation Date: Sat Jan  1 19:04:31 PST 2022
       Version      : CSPICE.............V.N0067
  
  
@@ -268,9 +268,7 @@ LIB
  
    All static libraries are compiled using the following compiler options:
  
-      -m64 -c -ansi -O2 -fPIC -DNON_UNIX_STDIO
-      -Wno-shift-op-parentheses -Wno-logical-op-parentheses
-      -Wno-parentheses
+      -c -ansi -m64 -O2 -fPIC -DNON_UNIX_STDIO
  
    The libraries contained in this directory are listed below. Each library
    is discussed in more detail later in the section devoted to the SRC

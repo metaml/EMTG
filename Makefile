@@ -1,6 +1,14 @@
 .DEFAULT_GOAL = help
 
-cmake: GSL_PATH = $(shell gsl-config --prefix)
+build: cspice cmake emtg ## build EMTGv9
+
+install: ## install EMTGv9
+	cd emtg && make install
+
+nix-build: ## build (nix package) emtg
+	nix build --print-build-logs
+
+cmake: export GSL_PATH = $(shell gsl-config --prefix)
 cmake: ## generate project files, e.g.: Makefile
 	echo $(IPOPT_INCLUDE_DIR)
 	echo $(IPOPT_LIBRARY_DIR)
@@ -9,13 +17,9 @@ cmake: ## generate project files, e.g.: Makefile
 emtg: ## build EMTG
 	cd emtg && make -j 16 VERBOSE=1
 
-cspice: get-cspice ## build cspice
-	cd cspice && for i in $$(find . -type f -name \*.csh); do \
-		echo $$i; \
-		sed --in-place '1 i\#!/usr/bin/env tcsh' $$i; \
-	done
+cspice: ## build cspice
+	cd emtg && ln -fs ../cspice ## hack to satisfy emtg/CMakeLists.txt
 	cd cspice && ./makeall.csh
-	cd emtg && ln -s ../cspice
 
 get-cspice: OS = $(shell uname --kernel-name | tr "[A-Z]" "[a-z]")
 get-cspice: ## build cspice
