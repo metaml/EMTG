@@ -21,21 +21,27 @@
 
         revision = "${self.lastModifiedDate}-${self.shortRev or "dirty"}";
       in {
+        packages.default = self;
         defaultPackage = self.packages.${system}.${pkg-name};
 
         devShell = pkgs.mkShell {
+          stdenv = pkgs.clangStdenv;
           buildInputs = with pkgs; [
             boost
+            clang
             cmake
             curl
-            gcc
             gfortran
+            gnugrep
+            gnused
             gsl
             ipopt
             lapack
             pkg-config
+            python3
             openblas
             openjdk
+            tcsh
           ];
           shellHook = ''
             export SHELL=$BASH
