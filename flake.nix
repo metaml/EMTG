@@ -20,12 +20,22 @@
         revision = "${self.lastModifiedDate}-${self.shortRev or "dirty"}";
       in {
         defaultPackage = with import nixpkgs { inherit system; };
-          pkgs.stdenv.mkDerivation rec {
+          # stdenv.mkDerivation {
+          stdenv.mkDerivation {
             name = "${pkg-name}";
             src = self;
-            version = "9.02";
+            system = system;
 
-            nativeBuildInputs = with pkgs; [
+            dontUseCmakeConfigure = true;
+
+            updateAutotoolsGnuConfigScriptsPhase = "true";
+            # phases = [ "buildPhase" "installPhase" ];
+            # unpackPhase = "true";
+            configurePhase = "true";
+            buildPhase = "make build";
+            installPhase = "make install && mkidr -p $out/bin && cp ./bin/EMTGv9 $out/bin";            
+
+            buildInputs = with pkgs; [
               boost
               clang
               cmake
@@ -41,30 +51,14 @@
               openblas
               openjdk
               tcsh
-              which
             ];
-
-            buildInputs = with pkgs; [];
-
-            dontUseCmakeConfigure = true;
-            
-            configurePhase = "echo skipping...";
-            buildPhase = ''
-              ls
-              find /build -type f -name CMakeCache.txt | xargs rm -f
-              make build
-            '';
-            installPhase = "make install";
-            meta = with pkgs.lib; {
-              homepage = "https://github.com/Karmanplus/EMTG";
-              description = "EMTGv9+Ipopt";
-            };
           };
-                
-        devShell = pkgs.mkShell {
+        
+        devShell = pkgs.mkShell rec {
+          name = "${pkg-name}";
           stdenv = pkgs.clangStdenv;
           # inputsFrom = builtins.attrValues self.defaultPackage;
-          buildInputs = with pkgs; [
+          packages = with pkgs; [
             boost
             clang
             cmake

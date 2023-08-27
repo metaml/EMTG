@@ -6,20 +6,20 @@ install: ## install EMTGv9
 	cd emtg && make install
 
 nix-build: ## build (nix package) emtg
-	nix build --print-build-logs
+	nix build --debug --print-build-logs
 
 cmake: export GSL_PATH = $(shell gsl-config --prefix)
 cmake: ## generate project files, e.g.: Makefile
 	echo $(IPOPT_INCLUDE_DIR)
 	echo $(IPOPT_LIBRARY_DIR)
-	cd emtg && cmake --fresh .
+	cd emtg && find . -name CMakeCache.txt | xargs rm -f && cmake --fresh .
 
 emtg: ## build EMTG
 	cd emtg && make -j 16 VERBOSE=1
 
 cspice: ## build cspice
 	cd emtg && ln -fs ../cspice ## hack to satisfy emtg/CMakeLists.txt
-	cd cspice && ./makeall.csh
+	cd emtg/cspice && mkdir -p lib && tcsh ./makeall.csh
 
 get-cspice: OS = $(shell uname --kernel-name | tr "[A-Z]" "[a-z]")
 get-cspice: ## build cspice
@@ -53,8 +53,12 @@ clobber: ## rm all generated file
 	cd emtg && rm -f Makefile cmake_install.cmake && rm -rf CMakefiles
 	rm -rf cspice Ipopt
 
+nix-build-clean: ## clean up after nix build
+	nix-store --gc		
+	nix-store --gc --print-roots | egrep -v "^(/nix/var|/run/\w+-system|\{memory|/proc)"
+
 help: ## help
 	@grep -E '^[a-zA-Z00-9_%-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: emtg
+.PHONY: cspice emtg

@@ -1,9 +1,8 @@
 build/*
 bin/*
+cspice/**
 /HardwareModels
 EMTG_v9_Results/*
-scripts/*
-#EMTG-config.cmake
 *.pyc
 Universe/ephemeris_files/*.bsp
 Universe/ephemeris_files/*.tls
@@ -111,8 +110,6 @@ testatron/output/
 docs/software_design_document/EMTG_software_design_document\.lof
 
 *.lot
-
-EMTG-Config\.cmake
 
 testatron/tests/Errors/
 testatron/HardwareModels/server.throttleOUTPUT
