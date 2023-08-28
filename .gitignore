@@ -1,16 +1,19 @@
 #.*
+**/#*
 **/*.a
+**/*.cmake
 **/*.o
 **/CMakeFiles/*
 **/Makefile
+**~
 *.Z
 .#*
-**~
-**/#*
-bin/**
-cspice/exe/**
 OpenSourceData/universe/ephemeris_files/PlanetsLight.bsp
 OpenSourceData/universe/ephemeris_files/de430.bsp
+bin/**
 build/
+cspice/exe/**
 emtg/PyEMTG/PyEMTG.pyw - Shortcut.lnk
+emtg/src/EMTGv9
+result
 scripts/*

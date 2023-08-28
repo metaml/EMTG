@@ -27,13 +27,17 @@
             system = system;
 
             dontUseCmakeConfigure = true;
-
-            updateAutotoolsGnuConfigScriptsPhase = "true";
-            # phases = [ "buildPhase" "installPhase" ];
-            # unpackPhase = "true";
-            configurePhase = "true";
+            #updateAutotoolsGnuConfigScriptsPhase = "true";
+            #configurePhase = "true";
+            #unpackPhase = "true";
+            #phases = [ "buildPhase" "installPhase" ];
             buildPhase = "make build";
-            installPhase = "make install && mkidr -p $out/bin && cp ./bin/EMTGv9 $out/bin";            
+            installPhase = ''
+              make install \
+              && mkdir -p $out/bin \
+              && cp ./emtg/src/EMTGv9 $out/bin \
+              && cd $out/bin && ln -sf EMTGv9 emtg
+            '';            
 
             buildInputs = with pkgs; [
               boost
@@ -63,6 +67,7 @@
             clang
             cmake
             curl
+            docker
             gfortran
             gnugrep
             gnused
