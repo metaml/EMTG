@@ -2,9 +2,6 @@
 
 build: cspice cmake emtg ## build EMTGv9
 
-install: ## install EMTGv9
-	cd emtg && make install
-
 nix-build: ## build (nix package) emtg
 	nix build --debug --print-build-logs
 
@@ -41,7 +38,7 @@ get-cspice: ## build cspice
 image: ## build a docker image
 	nix-build docker.nix	
 
-ipopt: ## build Ipopt (not used)
+ipopt: ## build Ipopt (not used and don't use)
 	git clone https://github.com/coin-or/Ipopt.git
 	cd Ipopt && rm -rf .git
 	cd Ipopt && ./configure --prefix=${PWD}/local && make -j8 && make install

@@ -25,6 +25,7 @@
             name = "${pkg-name}";
             src = self;
             system = system;
+            version = 9.02; # from https://github.com/nasa/EMTG/compare/master...lasp:EMTG:master
 
             dontUseCmakeConfigure = true;
             #updateAutotoolsGnuConfigScriptsPhase = "true";
