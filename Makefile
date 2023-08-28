@@ -54,6 +54,7 @@ clobber: ## rm all generated file
 	cd emtg/src && find . -type f -name \*.cmake | xargs rm -f
 	cd emtg/src && find . -type f -name Makefile | xargs rm -f
 	cd emtg && rm -f Makefile cmake_install.cmake && rm -rf CMakefiles
+	rm -f result
 	nix-store --gc
 
 nix-build-clean: ## clean up after nix build
