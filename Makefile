@@ -2,6 +2,9 @@
 
 build: cspice cmake emtg ## build EMTGv9
 
+install: ## install EMTGv9
+	cd emtg && make install
+
 nix-build: ## build (nix package) emtg
 	nix build --debug --print-build-logs
 
