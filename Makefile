@@ -10,8 +10,6 @@ nix-build: ## build (nix package) emtg
 
 cmake: export GSL_PATH = $(shell gsl-config --prefix)
 cmake: ## generate project files, e.g.: Makefile
-	echo $(IPOPT_INCLUDE_DIR)
-	echo $(IPOPT_LIBRARY_DIR)
 	cd emtg && find . -name CMakeCache.txt | xargs rm -f && cmake --fresh .
 
 emtg: ## build EMTG
@@ -41,7 +39,7 @@ get-cspice: ## build cspice
 docker: ## build a docker image
 	nix build .#docker
 
-ipopt: ## build Ipopt (not used and don't use)
+ipopt: ### build Ipopt (not required as nixpkgs.ipopt exists)
 	git clone https://github.com/coin-or/Ipopt.git
 	cd Ipopt && rm -rf .git
 	cd Ipopt && ./configure --prefix=${PWD}/local && make -j8 && make install
@@ -58,27 +56,27 @@ clobber: ## rm all generated file
 	nix-store --gc
 
 nix-build-clean: ## clean up after nix build
-	nix-store --gc		
+	nix-store --gc
 	nix-store --gc --print-roots | egrep -v "^(/nix/var|/run/\w+-system|\{memory|/proc)"
 
 help: ## help
 	@grep -E '^[a-zA-Z00-9_%-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'
 
-login: ## login karmanplus in docker hub
+login: ## login karmanplus to docker hub
 	docker login --username karmanplus
 
-tag: ## tag local emtg docker image--make docker first
+tag: ## tag emtg:latest to karmanplus/emtg:latest
 	docker load < result
 	docker tag emtg:latest karmanplus/emtg:latest
 
-push: ## push emtg image to docker hub
+push: ## push emtg:latest image to the docker hub
 	docker push karmanplus/emtg:latest
 
-pull: ## pull emtg image from docker hub
+pull: ## pull karmanplus/emtg:latest image from the docker hub
 	docker pull karmanplus/emtg:latest
 
-run: ## run emtg image with bash and shared directory
+run: ## run karmanplus/emtg:latest with the local ./work dir
 	docker run --tty --interactive --volume $$(pwd)/work:/work --env 'HOME=/work' --env PS1='emtg:\W$$ ' karmanplus/emtg:latest
 
 .PHONY: cspice emtg
