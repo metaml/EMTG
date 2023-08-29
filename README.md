@@ -12,4 +12,4 @@ The make targets and shell commands are in the Makefile.
 NB:
 - the EMTG docker image is public: https://hub.docker.com/r/karmanplus/emtg
 - \<emtg-dir\>/work is shared as /work in the docker container
-- you can edit files on your host computers in \<emtg-dir\>/work and it'll show up in /work in the emtg docker container
+- you can edit files on your host computer in \<emtg-dir\>/work and it'll show up in /work in the emtg docker container
