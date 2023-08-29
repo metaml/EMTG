@@ -65,14 +65,18 @@
 
           copyToRoot = pkgs.buildEnv {
             name = "${pkg-name}";
-            paths = [
+            paths = with pkgs; [
+              bashInteractive
+              coreutils
+              diffutils
+              findutils
+              gnugrep
+              gnused
+              dockerTools.binSh
+              dockerTools.caCertificates
+              dockerTools.fakeNss
+              dockerTools.usrBinEnv
               self.defaultPackage.${system}
-              pkgs.dockerTools.binSh
-              pkgs.dockerTools.caCertificates
-              pkgs.dockerTools.fakeNss
-              pkgs.dockerTools.usrBinEnv
-              pkgs.bash
-              pkgs.coreutils
             ];
             pathsToLink = [ "/bin" ];
           };

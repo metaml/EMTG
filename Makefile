@@ -65,4 +65,20 @@ help: ## help
 	@grep -E '^[a-zA-Z00-9_%-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'
 
+login: ## login karmanplus in docker hub
+	docker login --username karmanplus
+
+tag: ## tag local emtg docker image--make docker first
+	docker load < result
+	docker tag emtg:latest karmanplus/emtg:latest
+
+push: ## push emtg image to docker hub
+	docker push karmanplus/emtg:latest
+
+pull: ## pull emtg image from docker hub
+	docker pull karmanplus/emtg:latest
+
+run: ## run emtg image with bash and shared directory
+	docker run --tty --interactive --volume $$(pwd)/work:/work --env 'HOME=/work' --env PS1='emtg:\W$$ ' karmanplus/emtg:latest
+
 .PHONY: cspice emtg
