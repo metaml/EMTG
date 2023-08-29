@@ -77,6 +77,6 @@ pull: ## pull karmanplus/emtg:latest image from the docker hub
 	docker pull karmanplus/emtg:latest
 
 run: ## run karmanplus/emtg:latest with the local ./work dir
-	docker run --tty --interactive --volume $$(pwd)/work:/work --env 'HOME=/work' --env PS1='emtg:\W$$ ' karmanplus/emtg:latest
+	docker run --platform linux/amd64 --tty --interactive --volume $$(pwd)/work:/work --env 'HOME=/work' --env PS1='emtg:\W$$ ' karmanplus/emtg:latest
 
 .PHONY: cspice emtg
