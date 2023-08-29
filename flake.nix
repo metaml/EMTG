@@ -20,7 +20,6 @@
         revision = "${self.lastModifiedDate}-${self.shortRev or "dirty"}";
       in {
         defaultPackage = with import nixpkgs { inherit system; };
-          # stdenv.mkDerivation {
           stdenv.mkDerivation {
             name = "${pkg-name}";
             src = self;
@@ -58,6 +57,28 @@
               tcsh
             ];
           };
+
+        packages.docker = pkgs.dockerTools.buildImage {
+          name = "emtg";
+          tag = "latest";
+          created = "now";
+
+          copyToRoot = pkgs.buildEnv {
+            name = "${pkg-name}";
+            paths = [
+              self.defaultPackage.${system}
+              pkgs.dockerTools.binSh
+              pkgs.dockerTools.caCertificates
+              pkgs.dockerTools.fakeNss
+              pkgs.dockerTools.usrBinEnv
+              pkgs.bash
+              pkgs.coreutils
+            ];
+            pathsToLink = [ "/bin" ];
+          };
+
+          config.Cmd = [ "/bin/bash" ];
+        };
         
         devShell = pkgs.mkShell rec {
           name = "${pkg-name}";

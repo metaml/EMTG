@@ -38,8 +38,8 @@ get-cspice: ## build cspice
 		rm -f cspice.tar.Z; \
 	fi
 
-image: ## build a docker image
-	nix-build docker.nix	
+docker: ## build a docker image
+	nix build .#docker
 
 ipopt: ## build Ipopt (not used and don't use)
 	git clone https://github.com/coin-or/Ipopt.git
