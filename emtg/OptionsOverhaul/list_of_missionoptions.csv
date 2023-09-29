@@ -72,6 +72,8 @@ SpacecraftPowerSupplyCurveType,solar_power_model_type,,,0,0,1,"Solar power model
 std::vector<double>,solar_power_gamma,,7,"[1.32077,-0.10848,-0.11665,0.10843,-0.01279,0.0,0.0]",-inf,inf,"solar power coefficients gamma_1 through gamma_5, if all gamma = [1 0 0 0 0], then solar power is a simple 1/r^2","solar power coefficients gamma_1 through gamma_5, if all gamma = [1 0 0 0 0], then solar power is a simple 1/r^2"
 double,power_margin,,,0,0,1,power margin (fraction),power margin (fraction)
 double,power_decay_rate,,,0,0,1,power system decay rate (fraction per year),power system decay rate (fraction per year)
+int,power_decay_type,,,0,0,1,"How to model power decay.\n#0: e^(-t * power_decay_rate) \n#2: decay_coeff[0] + decay_coeff[1] * e^(decay_coeff[2] * t) + decay_coeff[3] * t","How to model power decay.\n#0: e^(-t * power_decay_rate) \n#2: decay_coeff[0] + decay_coeff[1] * e^(decay_coeff[2] * t) + decay_coeff[3] * t"
+std::vector<double>,decay_coefficients,,4,"[1,0,0,0]",-inf,inf,"Decay coefficients if power_decay_type = 1","Decay coefficients if power_decay_type = 1"
 double,power_system_decay_reference_epoch,86400,,51544.5,0,inf,reference date when the power system begins to decay,reference date when the power system begins to decay
 double,throttle_sharpness,,,100,1,100000,"Throttle sharpness (higher means more precise, lower means smoother)","Throttle sharpness (higher means more precise, lower means smoother)"
 ThrottleLogic,throttle_logic_mode,,,1,0,1,"Throttle logic mode #0: maximum number of thrusters,#1: minimum number of thrusters",Throttle logic mode\n#0: maximum number of thrusters\n#1: minimum number of thrusters

@@ -71,13 +71,14 @@ namespace EMTG
                 if (this->MyPowerSystemOptions.getPowerSupplyCurveType() == SpacecraftPowerSupplyCurveType::Sauer)
                 {
 
-                    this->ProducedPower = this->MyPowerSystemOptions.getP0() / r2 * ((g0 + g1 / r + g2 / r2) / (1.0 + g3 * r + g4 * r2));
+                    this->ProducedPower = this->MyPowerSystemOptions.getP0() * (1.0 / r2 * ((g0 + g1 / r + g2 / r2) / (1.0 + g3 * r + g4 * r2)) + g5);
 
                     doubleType r3 = r2*r;
                     doubleType r4 = r3*r;
                     doubleType r5 = r4*r;
 
                     this->dPdr = -(this->MyPowerSystemOptions.getP0() * (4 * g2 + 3 * g1*r + g3*(3 * g0*r3 + 4 * g1*r2 + 5 * g2*r) + 2 * g0*r2 + g4*(4 * g0*r4 + 5 * g1*r3 + 6 * g2*r2)) / (r5*(g4*r2 + g3*r + 1)*(g4*r2 + g3*r + 1))) _GETVALUE;
+					this->dPdr += this->MyPowerSystemOptions.getP0() * g5 _GETVALUE;
                 }
                 else if (this->MyPowerSystemOptions.getPowerSupplyCurveType() == SpacecraftPowerSupplyCurveType::Polynomial)
                 {
@@ -98,13 +99,26 @@ namespace EMTG
             }
 
             //time component
-            if (this->MyPowerSystemOptions.getDecayRate() > 1.0e-5)
+            if (this->MyPowerSystemOptions.getDecayType() == 0 && this->MyPowerSystemOptions.getDecayRate() > 1.0e-5)
             {
-                doubleType decay_coeff = exp(-this->MyPowerSystemOptions.getDecayRate() * (current_epoch - this->MyPowerSystemOptions.getPowerSystemDecayRefEpoch()) / (365.25 * 86400.0));
+				doubleType time_since_ref_epoch = current_epoch - this->MyPowerSystemOptions.getPowerSystemDecayRefEpoch();
+                doubleType decay_coeff = exp(-this->MyPowerSystemOptions.getDecayRate() * time_since_ref_epoch / (365.25 * 86400.0));
                 this->ProducedPower *= decay_coeff;
 
                 dPdr *= decay_coeff _GETVALUE;
                 dPdt = -this->MyPowerSystemOptions.getDecayRate() / (365.25 * 86400.0) * this->ProducedPower _GETVALUE;
+			}
+			else if (this->MyPowerSystemOptions.getDecayType() == 1) 
+			{
+				doubleType time_since_ref_epoch = current_epoch - this->MyPowerSystemOptions.getPowerSystemDecayRefEpoch();
+                doubleType decay_coeff = this->MyPowerSystemOptions.getDecayCoefficient(0);
+				decay_coeff += this->MyPowerSystemOptions.getDecayCoefficient(1) * exp(this->MyPowerSystemOptions.getDecayCoefficient(2) * time_since_ref_epoch / 86400.0);
+				decay_coeff += this->MyPowerSystemOptions.getDecayCoefficient(3) * time_since_ref_epoch / 86400.0;
+
+                dPdr *= decay_coeff _GETVALUE;
+                dPdt = this->ProducedPower * (this->MyPowerSystemOptions.getDecayCoefficient(2) * this->MyPowerSystemOptions.getDecayCoefficient(1) / 86400.0 * exp(this->MyPowerSystemOptions.getDecayCoefficient(2) * time_since_ref_epoch / 86400.0) + this->MyPowerSystemOptions.getDecayCoefficient(3) / 86400.0) _GETVALUE;
+				
+                this->ProducedPower *= decay_coeff;
                 
             }
             else

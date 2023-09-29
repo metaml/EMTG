@@ -1,4 +1,30 @@
 ~~~~~~~~~~~~~
+July 2023 - Version 9.03
+~~~~~~~~~~~~~
+
+Originator: Jeremy Knittel, jeremy.knittel@lasp.colorado.edu
+Alterations:
+1. Added new time dependence to power model to match Copernicus'
+formulation. EMTG v9.02 only had:
+
+exp(-gamma * t)
+
+New formulation:
+
+gamma1 + gamma2*exp(gamma3*t) + gamma4 * t
+
+2. Added new term to Sauer power model to match Copernicus. 
+
+EMTG v9.02:
+
+P = P0*(gamma1 + gamma2/r + gamma3/r^2)/(1+gamma4*r+gamma5*r^2)*(1/r^2)
+
+New formulation:
+
+
+P = P0*((gamma1 + gamma2/r + gamma3/r^2)/(1+gamma4*r+gamma5*r^2)*(1/r^2)+gamma6)
+
+~~~~~~~~~~~~~
 July 2023 - Version 9.02
 ~~~~~~~~~~~~~
 

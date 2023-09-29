@@ -80,6 +80,8 @@ class MissionOptions(object):
         self.solar_power_gamma = [1.32077,-0.10848,-0.11665,0.10843,-0.01279,0.0,0.0] #solar power coefficients gamma_1 through gamma_5, if all gamma = [1 0 0 0 0], then solar power is a simple 1/r^2
         self.power_margin = 0 #power margin (fraction)
         self.power_decay_rate = 0 #power system decay rate (fraction per year)
+        self.power_decay_type = 0 #How to model power decay.\n#0: e^(-t * power_decay_rate) \n#2: decay_coeff[0] + decay_coeff[1] * e^(decay_coeff[2] * t) + decay_coeff[3] * t
+        self.decay_coefficients = [1,0,0,0] #Decay coefficients if power_decay_type = 1
         self.power_system_decay_reference_epoch = 51544.5 #reference date when the power system begins to decay
         self.throttle_sharpness = 100 #Throttle sharpness (higher means more precise, lower means smoother)
         self.throttle_logic_mode = 1 #Throttle logic mode #0: maximum number of thrusters,#1: minimum number of thrusters
@@ -438,6 +440,12 @@ class MissionOptions(object):
                   
                     elif linecell[0] == "power_decay_rate":
                         self.power_decay_rate = float(linecell[1])
+                  
+                    elif linecell[0] == "power_decay_type":
+                        self.power_decay_type = int(linecell[1])
+                  
+                    elif linecell[0] == "decay_coefficients":
+                        self.decay_coefficients = [float(entry) for entry in linecell[1:]]
                   
                     elif linecell[0] == "power_system_decay_reference_epoch":
                         self.power_system_decay_reference_epoch = float(linecell[1])
@@ -1037,6 +1045,17 @@ class MissionOptions(object):
             if (self.power_decay_rate != 0 or writeAll):
                 optionsFile.write("#power system decay rate (fraction per year)\n")
                 optionsFile.write("power_decay_rate " + str(self.power_decay_rate) + "\n")
+    
+            if (self.power_decay_type != 0 or writeAll):
+                optionsFile.write("#How to model power decay.\n#0: e^(-t * power_decay_rate) \n#2: decay_coeff[0] + decay_coeff[1] * e^(decay_coeff[2] * t) + decay_coeff[3] * t\n")
+                optionsFile.write("power_decay_type " + str(self.power_decay_type) + "\n")
+    
+            if (self.decay_coefficients != [1,0,0,0] or writeAll):
+                optionsFile.write("#Decay coefficients if power_decay_type = 1\n")
+                optionsFile.write("decay_coefficients")
+                for entry in self.decay_coefficients:
+                    optionsFile.write(" " + str(entry))
+                optionsFile.write("\n")
     
             if (self.power_system_decay_reference_epoch != 51544.5 or writeAll):
                 optionsFile.write("#reference date when the power system begins to decay\n")

@@ -36,7 +36,7 @@ class PyEMTG_interface(wx.Frame):
 
         self.read_PyEMTG_options_file()
         
-        icon = wx.Icon("lasp-logo.color.art-acronym.transp-bg.small.png", wx.BITMAP_TYPE_PNG)
+        icon = wx.Icon(Mission.__file__.rstrip("Mission.py") + "/lasp-logo.color.art-acronym.transp-bg.small.png", wx.BITMAP_TYPE_PNG)
         self.SetIcon(icon)
 
         self.initialize_GUI()

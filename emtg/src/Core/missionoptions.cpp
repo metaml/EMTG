@@ -102,6 +102,8 @@ namespace EMTG
         this->solar_power_gamma = std::vector<double>({ 1.32077, -0.10848, -0.11665, 0.10843, -0.01279, 0.0, 0.0}); 
         this->power_margin = 0;
         this->power_decay_rate = 0;
+        this->power_decay_type = 0;
+        this->decay_coefficients = std::vector<double>({ 1, 0, 0, 0}); 
         this->power_system_decay_reference_epoch = 51544.5 * 86400.0;
         this->throttle_sharpness = 100;
         this->throttle_logic_mode = (ThrottleLogic) 1;
@@ -297,6 +299,10 @@ namespace EMTG
         this->power_margin_upperBound = 1;
         this->power_decay_rate_lowerBound = 0;
         this->power_decay_rate_upperBound = 1;
+        this->power_decay_type_lowerBound = 0;
+        this->power_decay_type_upperBound = 1;
+        this->decay_coefficients_lowerBound = -math::LARGE;
+        this->decay_coefficients_upperBound = math::LARGE;
         this->power_system_decay_reference_epoch_lowerBound = 0 * 86400.0;
         this->power_system_decay_reference_epoch_upperBound = math::LARGE * 86400.0;
         this->throttle_sharpness_lowerBound = 1;
@@ -1166,6 +1172,40 @@ namespace EMTG
             if (this->power_decay_rate < this->power_decay_rate_lowerBound || this->power_decay_rate > this->power_decay_rate_upperBound)
             {
                 throw std::out_of_range("Input option power_decay_rate is out of bounds on line " + std::to_string(lineNumber) + ". Value is " + std::to_string(this->power_decay_rate) + ", bounds are [" + std::to_string(this->power_decay_rate_lowerBound) + ", " + std::to_string(this->power_decay_rate_upperBound) + "].");
+            }
+            return;
+        }
+        if (linecell[0] == "power_decay_type")
+        {
+            this->power_decay_type = std::stoi(linecell[1]);
+            
+            //bounds check
+            if (this->power_decay_type < this->power_decay_type_lowerBound || this->power_decay_type > this->power_decay_type_upperBound)
+            {
+                throw std::out_of_range("Input option power_decay_type is out of bounds on line " + std::to_string(lineNumber) + ". Value is " + std::to_string(this->power_decay_type) + ", bounds are [" + std::to_string(this->power_decay_type_lowerBound) + ", " + std::to_string(this->power_decay_type_upperBound) + "].");
+            }
+            return;
+        }
+        if (linecell[0] == "decay_coefficients")
+        {
+            if (linecell.size() - 1 != 4)
+            {
+                throw std::invalid_argument("Input option decay_coefficients has been passed " + std::to_string(linecell.size() - 1) + " arguments but requires 4 arguments.");
+            }
+            
+            this->decay_coefficients.clear();
+            for (size_t entryIndex = 0; entryIndex < linecell.size() - 1; ++entryIndex)
+            {
+                this->decay_coefficients.push_back(std::stod(linecell[entryIndex + 1]));
+            }
+            
+            //bounds check
+            for (size_t entryIndex = 0; entryIndex < linecell.size() - 1; ++entryIndex)
+            {
+               if (this->decay_coefficients[entryIndex] < this->decay_coefficients_lowerBound || this->decay_coefficients[entryIndex] > this->decay_coefficients_upperBound)
+               {
+                   throw std::out_of_range("Input option decay_coefficients[" + std::to_string(entryIndex) + "] is out of bounds on line " + std::to_string(lineNumber) + ". Value is " + std::to_string(this->decay_coefficients[entryIndex]) + ", bounds are [" + std::to_string(this->decay_coefficients_lowerBound) + ", " + std::to_string(this->decay_coefficients_upperBound) + "].");
+               }
             }
             return;
         }
@@ -2370,6 +2410,21 @@ namespace EMTG
             optionsFileStream << "power_decay_rate " << this->power_decay_rate << std::endl;
         }
     
+        if (this->power_decay_type != 0 || writeAll)
+        {
+            optionsFileStream << "#How to model power decay.\n#0: e^(-t * power_decay_rate) \n#2: decay_coeff[0] + decay_coeff[1] * e^(decay_coeff[2] * t) + decay_coeff[3] * t" << std::endl;
+            optionsFileStream << "power_decay_type " << this->power_decay_type << std::endl;
+        }
+    
+        if (this->decay_coefficients != std::vector<double>({ 1, 0, 0, 0}) || writeAll)
+        {
+            optionsFileStream << "#Decay coefficients if power_decay_type = 1" << std::endl;
+            optionsFileStream << "decay_coefficients";
+            for (double entry : this->decay_coefficients)
+                optionsFileStream << " " << entry;
+            optionsFileStream << std::endl;
+        }
+        
         if (this->power_system_decay_reference_epoch != 51544.5 * 86400.0 || writeAll)
         {
             optionsFileStream << "#reference date when the power system begins to decay" << std::endl;
