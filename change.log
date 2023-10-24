@@ -1,5 +1,15 @@
 ~~~~~~~~~~~~~
-July 2023 - Version 9.03
+October 2023 - Version 9.04
+~~~~~~~~~~~~~
+
+Originator: Jeremy Knittel, jeremy.knittel@lasp.colorado.edu
+Alterations:
+1. Added new exponential Launch Vehicle model:
+
+mass to orbit = coeff1 * exp(coeff2 * c3)
+
+~~~~~~~~~~~~~
+September 2023 - Version 9.03
 ~~~~~~~~~~~~~
 
 Originator: Jeremy Knittel, jeremy.knittel@lasp.colorado.edu
