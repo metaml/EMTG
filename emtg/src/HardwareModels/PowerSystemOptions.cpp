@@ -45,9 +45,12 @@ namespace EMTG
             decay_rate(0.01),
             PowerMargin(0.0),
             bus_coefficients(std::vector<double>(3, 0.0)),
+            decay_coefficients(std::vector<double>(4, 0.0)),
+			decay_type(0),
             gamma(std::vector<double>(7, 0.0))
         {
             this->gamma[0] = 1.0;
+			this->decay_coefficients[0] = 1.0;
         }
 
         PowerSystemOptions::PowerSystemOptions(const std::string& linestring)
@@ -77,6 +80,23 @@ namespace EMTG
             this->bus_coefficients.clear();
             for (size_t k = 0; k < 3; ++k)
                 this->bus_coefficients.push_back(std::stod(linecell[cellIndex++]));
+			
+			// For backwards compatiability, dont assume line is long enough
+			if (cellIndex + 1 <= linecell.size())
+				this->decay_type = std::stoi(linecell[cellIndex++]);
+			else 
+				this->decay_type = 0;
+			
+			// For backwards compatiability, dont assume line is long enough
+            this->decay_coefficients.clear();
+			for (int idx = 0; idx < 4 ; idx++)
+			{
+				this->decay_coefficients.push_back(0.0);
+				if (cellIndex + 1 <= linecell.size())
+					this->decay_coefficients[idx] = std::stod(linecell[cellIndex++]);
+				else if (idx == 0)
+					this->decay_coefficients[idx] = 0;
+			}
 
         }//parse_input_line
 
@@ -91,7 +111,12 @@ namespace EMTG
 
             for (size_t k = 0; k < 3; ++k)
                 outputfile << " " << this->bus_coefficients[k];
-
+			
+			outputfile << " " << this->decay_type;
+			
+            for (size_t k = 0; k < 4; ++k)
+                outputfile << " " << this->decay_coefficients[k];
+			
             outputfile << std::endl;
 
         }//write_output_line
@@ -111,6 +136,14 @@ namespace EMTG
         void PowerSystemOptions::setDecayRate(const double& input)
         {
             this->decay_rate = input;
+        }        
+		void PowerSystemOptions::setDecayType(const int& input)
+        {
+            this->decay_type = input;
+        }
+		void PowerSystemOptions::setDecayCoefficients(const std::vector<double>& input)
+        {
+            this->decay_coefficients = input;
         }
         void PowerSystemOptions::setPowerSystemDecayRefEpoch(const double& input)
         {
@@ -219,7 +252,7 @@ namespace EMTG
             outputfile << "#Spacecraft_Power_Supply_Type choices are (0: Constant, 1: Solar)" << std::endl;
             outputfile << "#Spacecraft_Power_Supply_Curve_Type choices are (0: Sauer, 1: Polynomial)" << std::endl;
             outputfile << "#Spacecraft_Bus_Power_Type choices are (0: TypeA_Quadratic, 1: TypeB_Conditional)" << std::endl;
-            outputfile << "#name Spacecraft_Power_Supply_Type Spacecraft_Power_Supply_Curve_Type Spacecraft_Bus_Power_Type P0 mass_per_kW(kg) decay_rate gamma[0:6] BusPower[0:2]" << std::endl;
+            outputfile << "#name Spacecraft_Power_Supply_Type Spacecraft_Power_Supply_Curve_Type Spacecraft_Bus_Power_Type P0 mass_per_kW(kg) decay_rate gamma[0:6] BusPower[0:2] decay_type decay_coefficients[0:3]" << std::endl;
             outputfile << "#" << std::endl;
 
             for (size_t Index = 0; Index < this->PowerSystems.size(); ++Index)
@@ -259,6 +292,14 @@ namespace EMTG
         double PowerSystemOptionsLibrary::getDecayRate(const std::string& name)
         {
             return this->PowerSystems[this->getIndex(name)].getDecayRate();
+        }
+        int PowerSystemOptionsLibrary::getDecayType(const std::string& name)
+        {
+            return this->PowerSystems[this->getIndex(name)].getDecayType();
+        }
+        std::vector<double> PowerSystemOptionsLibrary::getDecayCoefficients(const std::string& name)
+        {
+            return this->PowerSystems[this->getIndex(name)].getDecayCoefficientVector();
         }
         double PowerSystemOptionsLibrary::getPowerSystemDecayRefEpoch(const std::string& name)
         {

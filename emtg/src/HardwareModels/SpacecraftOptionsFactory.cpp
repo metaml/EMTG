@@ -122,6 +122,8 @@ namespace EMTG
                 myPowerSystemOptions.setPowerSupplyType(options.power_source_type);
                 myPowerSystemOptions.setPowerSupplyCurveType(options.solar_power_model_type);
                 myPowerSystemOptions.setDecayRate(options.power_decay_rate);
+                myPowerSystemOptions.setDecayType(options.power_decay_type);
+                myPowerSystemOptions.setDecayCoefficients(options.decay_coefficients);
                 myPowerSystemOptions.setPowerMargin(options.power_margin);
                 myPowerSystemOptions.setPowerSystemDecayRefEpoch(options.power_system_decay_reference_epoch);
                 myPowerSystemOptions.setGammaVector(options.solar_power_gamma);

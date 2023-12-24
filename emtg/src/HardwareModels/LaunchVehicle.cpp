@@ -67,6 +67,14 @@ namespace EMTG
                     }
                     break;
                 }
+                case 1: //exponential
+                {	
+					
+					this->DeliveredMass = this->myOptions.getCoefficient(0) * exp(this->myOptions.getCoefficient(1)*C3);
+					this->dmdC3 = this->myOptions.getCoefficient(1) * this->DeliveredMass;
+    				
+                    break;
+				}
                 default:
                     throw std::invalid_argument("LaunchVehicle::ModelType " + std::to_string(this->myOptions.getModelType()) + " is not currently implemented. Place a breakpoint in " + std::string(__FILE__) + ", line " + std::to_string(__LINE__));
             }

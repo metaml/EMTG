@@ -57,6 +57,9 @@ namespace EMTG
             inline SpacecraftPowerSupplyType getPowerSupplyType() const { return this->Spacecraft_Power_Supply_Type; }
             inline SpacecraftPowerSupplyCurveType getPowerSupplyCurveType() const { return this->Spacecraft_Power_Supply_Curve_Type; }
             inline double getDecayRate() const { return this->decay_rate; }
+            inline int getDecayType() const { return this->decay_type; }
+            inline double getDecayCoefficient(const size_t& p) const { return this->decay_coefficients[p]; }
+            inline std::vector<double> getDecayCoefficientVector() const { return this->decay_coefficients; }
             inline double getPowerSystemDecayRefEpoch() const { return this->power_system_decay_reference_epoch; };
             inline double getP0() const { return this->P0; }
             inline double getPowerMargin() const { return this->PowerMargin; }
@@ -72,6 +75,8 @@ namespace EMTG
             void setPowerSupplyType(const SpacecraftPowerSupplyType& input);
             void setPowerSupplyCurveType(const SpacecraftPowerSupplyCurveType& input);
             void setDecayRate(const double& input);
+            void setDecayType(const int& input);
+            void setDecayCoefficients(const std::vector<double>& input);
             void setPowerSystemDecayRefEpoch(const double & input);
             void setPowerMargin(const double& input);
             void setGammaVector(const std::vector<double>& input);
@@ -88,6 +93,8 @@ namespace EMTG
             SpacecraftPowerSupplyCurveType Spacecraft_Power_Supply_Curve_Type;
             double P0;
             double decay_rate;
+			int decay_type;
+			std::vector<double> decay_coefficients;
             double power_system_decay_reference_epoch;
             double PowerMargin;
             std::vector<double> bus_coefficients;
@@ -119,6 +126,8 @@ namespace EMTG
             SpacecraftPowerSupplyType getPowerSupplyType(const std::string& name);
             SpacecraftPowerSupplyCurveType getPowerSupplyCurveType(const std::string& name);
             double getDecayRate(const std::string& name);
+            int getDecayType(const std::string& name);
+            std::vector<double> getDecayCoefficients(const std::string& name);
             double getPowerSystemDecayRefEpoch(const std::string & name);
             double getP0(const std::string& name);
             double getPowerMargin(const std::string& name);

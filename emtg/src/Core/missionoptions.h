@@ -70,7 +70,7 @@ namespace EMTG
         std::vector<double> DLA_bounds;//DLA in degrees
         std::vector<double> RLA_bounds;//RLA in degrees
         PhaseType mission_type;//mission type, #0: MGALTS, #1: FBLTS, #2: MGALT, #3: FBLT, #4: PSBI, #5: PSFB, #6: MGAnDSMs, #7: CoastPhase, #8: SundmanCoastPhase, #9: variable phase type, #10: ProbeEntryPhase, #11 ControlLawThrustPhase
-        int NLP_solver_type;//NLP solver type,#0: SNOPT,#1: WORHP
+        int NLP_solver_type;//NLP solver type,#0: SNOPT,#1: WORHP,#2: IPOPT-MA27, #3: IPOPT-MUMPS
         NLPMode NLP_solver_mode;//NLP solver mode,#0: find feasible point only,#1: find optimal solution,#2: satisfy equality constraints
         bool quiet_NLP;//Quiet NLP solver?
         bool ACE_feasible_point_finder;//Enable ACE feasible point finder?
@@ -133,6 +133,8 @@ namespace EMTG
         std::vector<double> solar_power_gamma;//solar power coefficients gamma_1 through gamma_5, if all gamma = [1 0 0 0 0], then solar power is a simple 1/r^2
         double power_margin;//power margin (fraction)
         double power_decay_rate;//power system decay rate (fraction per year)
+        int power_decay_type;//How to model power decay.\n#0: e^(-t * power_decay_rate) \n#2: decay_coeff[0] + decay_coeff[1] * e^(decay_coeff[2] * t) + decay_coeff[3] * t
+        std::vector<double> decay_coefficients;//Decay coefficients if power_decay_type = 1
         double power_system_decay_reference_epoch;//reference date when the power system begins to decay
         double throttle_sharpness;//Throttle sharpness (higher means more precise, lower means smoother)
         ThrottleLogic throttle_logic_mode;//Throttle logic mode #0: maximum number of thrusters,#1: minimum number of thrusters
@@ -330,6 +332,10 @@ namespace EMTG
         double power_margin_upperBound;
         double power_decay_rate_lowerBound;
         double power_decay_rate_upperBound;
+        int power_decay_type_lowerBound;
+        int power_decay_type_upperBound;
+        double decay_coefficients_lowerBound;
+        double decay_coefficients_upperBound;
         double power_system_decay_reference_epoch_lowerBound;
         double power_system_decay_reference_epoch_upperBound;
         double throttle_sharpness_lowerBound;
